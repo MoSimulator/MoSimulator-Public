@@ -340,10 +340,27 @@ namespace GameSystems.Management
                 {
                     var assembly = Assembly.LoadFrom(dllPath);
                     Debug.Log($"Successfully loaded mod assembly from {dllPath}: {assembly.FullName}");
+
+                    var patchesType = assembly.GetType("Patches");
+                    if (patchesType != null) {
+                        Debug.Log($"Found Patches class for {assembly.FullName}");
+
+                        var initializeMethod = patchesType.GetMethod("Initialize", BindingFlags.Static | BindingFlags.Public);
+                        if (initializeMethod != null) {
+                            Debug.Log($"Found Patches.Initialize method for {assembly.FullName}, attempting to invoke");
+                            initializeMethod.Invoke(null, null);
+                            Debug.Log($"Successfully invoked Patches.Initialize method for {assembly.FullName}");
+                        } else {
+                            Debug.Log($"No Patches.Initialize method found for {assembly.FullName}");
+                        }
+                    } else {
+                        Debug.Log($"No Patches class found for {assembly.FullName}");
+                    }
                 }
                 catch (Exception e)
                 {
-                    Debug.LogError($"Failed to load mod assembly from {dllPath}: {e.Message}");
+                    Debug.LogError($"Failed to load mod assembly from {dllPath}:");
+                    Debug.LogException(e);
                 }
             }
         }
