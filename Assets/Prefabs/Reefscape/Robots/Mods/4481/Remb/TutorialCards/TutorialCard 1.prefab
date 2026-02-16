@@ -21,7 +21,7 @@ PrefabInstance:
     - target: {fileID: 6000603204863370303, guid: 4f6390b7332e92b43aee0cf7f4734f72,
         type: 3}
       propertyPath: m_text
-      value: Lynk Throws Algae To Barge, So Line Up With The Gray Line
+      value: Rembrandts climbs slowly so make sure to begin climbing early!
       objectReference: {fileID: 0}
     - target: {fileID: 6000603204863370303, guid: 4f6390b7332e92b43aee0cf7f4734f72,
         type: 3}
@@ -32,7 +32,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Sprite
       value: 
-      objectReference: {fileID: 21300000, guid: 83f4baee96396cf499f767e3d691e661,
+      objectReference: {fileID: 21300000, guid: bc23742ff68d7bf46b6b36580786d5a1,
         type: 3}
     - target: {fileID: 7647712989278884331, guid: 4f6390b7332e92b43aee0cf7f4734f72,
         type: 3}

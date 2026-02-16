@@ -15,7 +15,7 @@ MonoBehaviour:
   m_DefaultGroup: 9162ef73a8b7ff14a81079bd59987bc0
   m_currentHash:
     serializedVersion: 2
-    Hash: 3e5ed459730db5668ffb008ec2775a89
+    Hash: 06f85d5587a6c9711089a1360531b5b9
   m_OptimizeCatalogSize: 0
   m_BuildRemoteCatalog: 0
   m_BundleLocalCatalog: 0
@@ -65,6 +65,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 9cd31e1fc2fdeb84fbde0fabd689577f, type: 2}
   - {fileID: 11400000, guid: f5b71b85a798d6f40bb1c3812901e71f, type: 2}
   - {fileID: 11400000, guid: aac5dc43f207f464cbe5c74a47d73199, type: 2}
+  - {fileID: 11400000, guid: ee83b47e4c454a9449ceb8eff159444d, type: 2}
   m_BuildSettings:
     m_LogResourceManagerExceptions: 1
     m_BundleBuildPath: Temp/com.unity.addressables/AssetBundles
@@ -78,6 +79,8 @@ MonoBehaviour:
         m_Value: 'http://[PrivateIpAddress]:[HostingServicePort]'
       - m_Id: 09b0b24e528b599428cd44c5db541c03
         m_Value: '[UnityEditor.EditorUserBuildSettings.activeBuildTarget]'
+      - m_Id: 2255e181cdca85447a0c676552160cf3
+        m_Value: '{UnityEngine.Application.persistentDataPath}/Mods/VenturaModpack'
       - m_Id: 37e529e86860a7741a1cf0fcf45e094b
         m_Value: '[UnityEngine.AddressableAssets.Addressables.BuildPath]/[BuildTarget]'
       - m_Id: 3995af1f76783674a86b8f7323c5f71e
@@ -90,6 +93,8 @@ MonoBehaviour:
         m_Value: '{UnityEngine.Application.dataPath}/../Mods/Packed Assets'
       - m_Id: c65595e78f4c7db44a4324f2e84106be
         m_Value: '{UnityEngine.Application.persistentDataPath}/Mods/MechTechMod'
+      - m_Id: cb264362466e40045bb508326c646f73
+        m_Value: '{UnityEngine.Application.dataPath}/../Mods/VenturaModpack'
       - m_Id: dc362afee9112ee489246a2a832e6005
         m_Value: '{UnityEngine.Application.dataPath}/../Mods/MechTechMod'
     m_ProfileEntryNames:
@@ -98,6 +103,9 @@ MonoBehaviour:
       m_InlineUsage: 0
     - m_Id: 09b0b24e528b599428cd44c5db541c03
       m_Name: BuildTarget
+      m_InlineUsage: 0
+    - m_Id: 2255e181cdca85447a0c676552160cf3
+      m_Name: VenturaModpack_LoadPath
       m_InlineUsage: 0
     - m_Id: 37e529e86860a7741a1cf0fcf45e094b
       m_Name: Local.BuildPath
@@ -116,6 +124,9 @@ MonoBehaviour:
       m_InlineUsage: 0
     - m_Id: c65595e78f4c7db44a4324f2e84106be
       m_Name: MechTechMod_LoadPath
+      m_InlineUsage: 0
+    - m_Id: cb264362466e40045bb508326c646f73
+      m_Name: VenturaModpack_BuildPath
       m_InlineUsage: 0
     - m_Id: dc362afee9112ee489246a2a832e6005
       m_Name: MechTechMod_BuildPath

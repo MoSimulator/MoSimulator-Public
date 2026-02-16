@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: VenturaModpack
+  m_EditorClassIdentifier: 
+  m_GroupName: VenturaModpack
+  m_GUID: fc424f7608fccbc46b2b292a9f27001f
+  m_SerializeEntries:
+  - m_GUID: a496068ac93c34e4ca484a2ca461ecd4
+    m_Address: Assets/Prefabs/Reefscape/Robots/Mods/4481
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - modpack_metadata
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: 75be54ec8452b4f43b0aa1a3b6238e73, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: beba59126f1de8940b86c519a7a5d7ab, type: 2}
+    - {fileID: 11400000, guid: f9118665210aa234d914329356cbfc9c, type: 2}

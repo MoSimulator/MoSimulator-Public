@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 713155721937481dbf0332a6dcf52567, type: 3}
   m_Name: 4481
   m_EditorClassIdentifier: 
-  modpackName: 4481Rembrants
+  modpackName: VenturaModpack
   modpackVersion: 1.0.0
-  authorName: OliverHakansson
-  description: yuhhuh
+  authorName: Ari|9084
+  description: Robotsat2025CAVE
   robots:
   - {fileID: 11400000, guid: 8b78cdba9d4bea24f998194c4fd7a68e, type: 2}

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Climb
   m_EditorClassIdentifier: 
   elevatorHeight: 0
-  armAngle: -260
+  armAngle: -230
   climbArmAngle: 84.8
   climbWristAngle: -79
   droppyThingAngle: 84.8
