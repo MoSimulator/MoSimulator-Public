@@ -16,3 +16,4 @@ MonoBehaviour:
   armAngle: 0
   climbArmAngle: 0
   climbWristAngle: 0
+  droppyThingAngle: 0

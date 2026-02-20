@@ -29,7 +29,6 @@ namespace Prefabs.Reefscape.Robots.Mods._4481.Remb
         [SerializeField] private PidConstants droppyThingPid;
 
         [SerializeField] private Rembrantsetpoint stow;
-        [SerializeField] private Rembrantsetpoint intake;
         [SerializeField] private Rembrantsetpoint l1;
         [SerializeField] private Rembrantsetpoint l2;
         [SerializeField] private Rembrantsetpoint l3;
@@ -256,7 +255,6 @@ namespace Prefabs.Reefscape.Robots.Mods._4481.Remb
                     SetSetpoint(climbed);
                     break;
             }
-            // SetSetpoint(intake);
             UpdateSetpoints();
         }
 
@@ -315,12 +313,12 @@ namespace Prefabs.Reefscape.Robots.Mods._4481.Remb
             {
                 if (LastSetpoint == ReefscapeSetpoints.L4)
                 {
-                    _coralController.ReleaseGamePieceWithForce(new Vector3(0, 0, -5));
+                    _coralController.ReleaseGamePieceWithContinuedForce(new Vector3(0, 0, -5), 0.2f, 0.5f);
                     StartCoroutine(SpinCoralRollers());
                 }
                 else if (LastSetpoint == ReefscapeSetpoints.L3 || LastSetpoint == ReefscapeSetpoints.L2)
                 {
-                    _coralController.ReleaseGamePieceWithForce(new Vector3(0, 0, 10));
+                    _coralController.ReleaseGamePieceWithContinuedForce(new Vector3(0, 0, 7),0.15f,0.9f);
                     StartCoroutine(SpinCoralRollers());
 
                 }
