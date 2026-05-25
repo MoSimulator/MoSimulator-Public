@@ -1,0 +1,21 @@
+{
+    "name": "Octobots",
+    "rootNamespace": "",
+    "references": [
+        "GUID:edd0d136b35b5424b83a29dc96272c0e",
+        "GUID:cd23c75431a434244be3df3f62689b56",
+        "GUID:27d619f9f1c48d942926bd997554834f",
+        "GUID:e4dc87efb9aca0d44893bc6da5af2a21",
+        "GUID:75469ad4d38634e559750d17036d5f7c",
+        "GUID:4b86f14afd185c7499762b8ef0a7e3a0"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
