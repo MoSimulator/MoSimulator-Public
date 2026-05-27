@@ -22,13 +22,16 @@ namespace Prefabs.Reefscape.Robots.Mods._4481.Remb
         [SerializeField] private GenericJoint climbArm;
         [SerializeField] private GenericJoint climbWrist;
         [SerializeField] private GenericJoint droppyThing;
+        [SerializeField] private RembrandtClimber climbHitboxes;
 
+        [Header("Pids")]
         [SerializeField] private PidConstants armPid;
         [SerializeField] private PidConstants elevatorPid;
         [SerializeField] private PidConstants climbArmPid;
         [SerializeField] private PidConstants climbWristPid;
         [SerializeField] private PidConstants droppyThingPid;
 
+        [Header("Setpoints")]
         [SerializeField] private Rembrantsetpoint stow;
         [SerializeField] private Rembrantsetpoint l1;
         [SerializeField] private Rembrantsetpoint l2;
@@ -42,15 +45,19 @@ namespace Prefabs.Reefscape.Robots.Mods._4481.Remb
         [SerializeField] private Rembrantsetpoint lollipop;
         [SerializeField] private Rembrantsetpoint climb;
         [SerializeField] private Rembrantsetpoint climbed;
+        [SerializeField] private Rembrantsetpoint climbRetract1;
+        [SerializeField] private Rembrantsetpoint climbRetract2;
 
-
+        [Header("Barge Algae Variables")]
         [SerializeField] private float vertical;
         [SerializeField] private float horizontal;
         [SerializeField] private float bargeDelay;
 
+        [Header("Intakes")]
         [SerializeField] private ReefscapeGamePieceIntake coralIntake;
         [SerializeField] private ReefscapeGamePieceIntake algaeIntake;
 
+        [Header("Game Piece States")]
         [SerializeField] private GamePieceState coralStowState;
         [SerializeField] private GamePieceState coralL4State;
         [SerializeField] private GamePieceState algaeStowState;
@@ -60,6 +67,7 @@ namespace Prefabs.Reefscape.Robots.Mods._4481.Remb
         [SerializeField] private GenericRoller[] rollers;
         [SerializeField] private Collider[] EEcolliders;
 
+        [Header("Audio")]
         [SerializeField] private AudioSource algaeStallSource;
         [SerializeField] private AudioClip algaeStallAudio;
         [SerializeField] private AudioSource algaeRollerSource;
@@ -70,6 +78,8 @@ namespace Prefabs.Reefscape.Robots.Mods._4481.Remb
         private float _coralRollerTargetSpeed;
 
         private bool algaePlaced = false;
+        private bool retractingClimb = false;
+        private bool climbing = false;
         private RobotGamePieceController<ReefscapeGamePiece, ReefscapeGamePieceData>.GamePieceControllerNode _coralController;
         private RobotGamePieceController<ReefscapeGamePiece, ReefscapeGamePieceData>.GamePieceControllerNode _algaeController;
 
@@ -138,10 +148,9 @@ namespace Prefabs.Reefscape.Robots.Mods._4481.Remb
         private void UpdateSetpoints()
         {
             elevator.SetTarget(_elevatorTargetHeight);
-            Debug.Log(_armTargetAngle);
             arm.SetTargetAngle(_armTargetAngle).noWrap(10).withAxis(JointAxis.X);
             climbArm.SetTargetAngle(_climbArmTargetAngle).withAxis(JointAxis.X);
-            climbWrist.SetTargetAngle(_climbWristTargetAngle).withAxis(JointAxis.X);
+            climbWrist.SetTargetAngle(_climbWristTargetAngle).noWrap(90).withAxis(JointAxis.X);
             droppyThing.SetTargetAngle(_droppyThingTargetAngle).withAxis(JointAxis.X);
             foreach (var roller in algaeRollers)
             {
@@ -181,16 +190,39 @@ namespace Prefabs.Reefscape.Robots.Mods._4481.Remb
                 UpdateAlgaeRollers(0);
                 UpdateCoralRollers(0);
             }
+            if (!OuttakeAction.IsPressed())
+            {
+                algaePlaced = false;
+            }
             bool hasAlgae = _algaeController.HasPiece();
             bool hasCoral = _coralController.HasPiece();
+            if (retractingClimb && !climbing)
+            {
+                retractingClimb = false;
+            }
             switch (CurrentSetpoint)
             {
                 case ReefscapeSetpoints.Stow:
-                    SetSetpoint(stow);
+                    if (LastSetpoint != ReefscapeSetpoints.Climbed && !climbing)
+                    {
+                        SetSetpoint(stow);
+                    }
+                    else
+                    {
+                        StartCoroutine(RetractClimb());
+                        retractingClimb = true;
+                        break;
+                    }
                     UpdateAlgaeRollers(0);
                     intakeSetpoint = "Coral";
                     break;
                 case ReefscapeSetpoints.Intake:
+                    if (climbing)
+                    {
+                        StartCoroutine(RetractClimb());
+                        retractingClimb = true;
+                        break;
+                    }
                     // _algaeController.RequestIntake(algaeIntake, true);
                     _coralController.RequestIntake(coralIntake, true);
                     _coralController.SetTargetState(coralStowState);
@@ -205,18 +237,33 @@ namespace Prefabs.Reefscape.Robots.Mods._4481.Remb
                     UpdateAlgaeRollers(0);
                     break;
                 case ReefscapeSetpoints.Place:
+                    if (climbing)
+                    {
+                        StartCoroutine(RetractClimb());
+                        retractingClimb = true;
+                        break;
+                    }
                     if (LastSetpoint == ReefscapeSetpoints.Barge)
                     {
                         StartCoroutine(ScoreBargeAlgae());
-                        algaePlaced = true;
 
                         break;
                     }
+                    algaePlaced = true;
 
 
                     PlacePiece();
                     break;
                 case ReefscapeSetpoints.L1:
+                    if (climbing)
+                    {
+                        if (!retractingClimb)
+                        {
+                            StartCoroutine(RetractClimb());
+                            retractingClimb = true;
+                        }
+                        break;
+                    }
                     UpdateAlgaeRollers(0);
                     UpdateCoralRollers(0);
                     SetSetpoint(l1);
@@ -227,51 +274,107 @@ namespace Prefabs.Reefscape.Robots.Mods._4481.Remb
                     UpdateAlgaeRollers(0);
                     break;
                 case ReefscapeSetpoints.L2:
-                    _coralController.SetTargetState(coralStowState);
-                    SetSetpoint(l2);
-                    UpdateAlgaeRollers(0);
-                    UpdateCoralRollers(0);
+                    if (!climbing)
+                    {
+                        _coralController.SetTargetState(coralStowState);
+                        SetSetpoint(l2);
+                        UpdateAlgaeRollers(0);
+                        UpdateCoralRollers(0);
+                    }
+                    else
+                    {
+                        StartCoroutine(RetractClimb());
+                        retractingClimb = true;
+                    }
                     break;
                 case ReefscapeSetpoints.LowAlgae:
-                    SetSetpoint(lowAlgae);
-                    intakeSetpoint = "Algae";
-                    //UpdateAlgaeRollers(-300);
-                    UpdateCoralRollers(0);
-                    _algaeController.RequestIntake(algaeIntake, IntakeAction.IsPressed());
-                    UpdateAlgaeRollers(IntakeAction.IsPressed() ? -300 : 0);
+                    if (!climbing)
+                    {
+                        SetSetpoint(lowAlgae);
+                        intakeSetpoint = "Algae";
+                        //UpdateAlgaeRollers(-300);
+                        UpdateCoralRollers(0);
+                        _algaeController.RequestIntake(algaeIntake, IntakeAction.IsPressed());
+                        UpdateAlgaeRollers(IntakeAction.IsPressed() ? -300 : 0);
+                    }
+                    else
+                    {
+                        StartCoroutine(RetractClimb());
+                        retractingClimb = true;
+                    }
+
                     break;
                 case ReefscapeSetpoints.L3:
-                    _coralController.SetTargetState(coralStowState);
-                    UpdateAlgaeRollers(0);
-                    UpdateCoralRollers(0);
-                    SetSetpoint(l3);
+                    if (!climbing)
+                    {
+                        _coralController.SetTargetState(coralStowState);
+                        UpdateAlgaeRollers(0);
+                        UpdateCoralRollers(0);
+                        SetSetpoint(l3);
+
+                    }
+                    else
+                    {
+                        StartCoroutine(RetractClimb());
+                        retractingClimb = true;
+                    }
                     break;
                 case ReefscapeSetpoints.HighAlgae:
-                    intakeSetpoint = "Algae";
-                    SetSetpoint(highAlgae);
-                    //UpdateAlgaeRollers(-300);
-                    UpdateCoralRollers(0);
-                    _algaeController.RequestIntake(algaeIntake, IntakeAction.IsPressed());
-                    UpdateAlgaeRollers(IntakeAction.IsPressed() ? -300 : 0);
+                    if (!climbing)
+                    {
+                        intakeSetpoint = "Algae";
+                        SetSetpoint(highAlgae);
+                        //UpdateAlgaeRollers(-300);
+                        UpdateCoralRollers(0);
+                        _algaeController.RequestIntake(algaeIntake, IntakeAction.IsPressed());
+                        UpdateAlgaeRollers(IntakeAction.IsPressed() ? -300 : 0);
+                    }
+                    else
+                    {
+                        StartCoroutine(RetractClimb());
+                        retractingClimb = true;
+                    }
                     break;
                 case ReefscapeSetpoints.L4:
-                    UpdateCoralRollers(0);
-                    SetSetpoint(l4);
+                    if (!climbing)
+                    {
+                        _coralController.SetTargetState(coralStowState);
+                        UpdateCoralRollers(0);
+                        SetSetpoint(l4);
+                    }
+                    else
+                    {
+                        StartCoroutine(RetractClimb());
+                        retractingClimb = true;
+                    }
+
                     _coralController.SetTargetState(coralL4State);
                     break;
                 case ReefscapeSetpoints.Processor:
                     break;
                 case ReefscapeSetpoints.Barge:
-                    SetSetpoint(bargePrep);
+                    if (!climbing)
+                    {
+                        SetSetpoint(bargePrep);
+                    }
+                    else
+                    {
+                        StartCoroutine(RetractClimb());
+                        retractingClimb = true;
+                    }
                     break;
                 case ReefscapeSetpoints.RobotSpecial:
                     SetState(ReefscapeSetpoints.Stow);
                     break;
                 case ReefscapeSetpoints.Climb:
+                    climbing = true;
                     SetSetpoint(climb);
+                    retractingClimb = false;
                     break;
                 case ReefscapeSetpoints.Climbed:
+                    climbing = true;
                     SetSetpoint(climbed);
+                    retractingClimb = false;
                     break;
             }
             UpdateSetpoints();
@@ -331,7 +434,6 @@ namespace Prefabs.Reefscape.Robots.Mods._4481.Remb
         {
             if (!algaePlaced)
             {
-                algaePlaced = true;
                 SetSetpoint(bargePlace);
                 foreach (var col in EEcolliders)
                 {
@@ -344,15 +446,10 @@ namespace Prefabs.Reefscape.Robots.Mods._4481.Remb
                 PlacePiece();
 
                 yield return new WaitForSeconds(0.3f);
-                UpdateAlgaeRollers(0);
                 foreach (var col in EEcolliders)
                 {
                     col.enabled = true;
                 }
-                Debug.Log("Scored algae on barge");
-                _armTargetAngle += 1;
-                SetSetpoint(stow);
-                algaePlaced = false;
             }
         }
         public IEnumerator SpinCoralRollers()
@@ -370,6 +467,26 @@ namespace Prefabs.Reefscape.Robots.Mods._4481.Remb
                 yield return new WaitForSeconds(0.9f);
                 UpdateAlgaeRollers(0);
                 algaeSpinning = false;
+            }
+        }
+        public IEnumerator RetractClimb()
+        {
+            if (!retractingClimb)
+            {
+                climbHitboxes.forceDeClimb();
+                SetSetpoint(climbRetract1);
+                while (!ClimbWristAtSetpoint(climbRetract1))
+                {
+                    yield return new WaitForSeconds(0.1f); // Wait 100ms before checking again
+                }
+                SetSetpoint(climbRetract2);
+                while (!ClimbArmAtSetpoint(climbRetract2))
+                {
+                    yield return new WaitForSeconds(0.1f); // Wait 100ms before checking again
+                }
+                SetSetpoint(stow);
+                retractingClimb = false;
+                climbing = false;
             }
         }
         private void PlacePiece()
@@ -408,6 +525,19 @@ namespace Prefabs.Reefscape.Robots.Mods._4481.Remb
                     StartCoroutine(SpinCoralRollers());
                 }
             }
+
+        }
+        private bool ClimbWristAtSetpoint(Rembrantsetpoint targetSetpoint)
+        {
+            bool climbAtSetpoint = Utils.InAngularRange(climbWrist.GetSingleAxisAngle(JointAxis.X), targetSetpoint.climbWristAngle, 2f);
+
+            return climbAtSetpoint;
+        }
+        private bool ClimbArmAtSetpoint(Rembrantsetpoint targetSetpoint)
+        {
+            bool climbAtSetpoint = Utils.InAngularRange(climbArm.GetSingleAxisAngle(JointAxis.X), targetSetpoint.climbArmAngle, 2f);
+
+            return climbAtSetpoint;
         }
     }
 }

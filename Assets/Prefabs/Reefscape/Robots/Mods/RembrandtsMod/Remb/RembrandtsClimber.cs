@@ -81,5 +81,11 @@ namespace Prefabs.Reefscape.Robots.Mods._4481.Remb
                 }
             }
         }
+        public void forceDeClimb()
+        {
+            _firstTriggered = false;
+            TryEnablingColliders();
+            TryDisablingColliders();
+        }
     }
 }

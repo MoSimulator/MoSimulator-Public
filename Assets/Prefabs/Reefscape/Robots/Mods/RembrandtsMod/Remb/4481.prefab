@@ -61198,6 +61198,7 @@ MonoBehaviour:
   climbArm: {fileID: 1892264211426014786}
   climbWrist: {fileID: 2538502940820140695}
   droppyThing: {fileID: 9197305166813754575}
+  climbHitboxes: {fileID: 7667648568621046831}
   armPid:
     kP: 1
     kI: 0
@@ -61241,6 +61242,8 @@ MonoBehaviour:
   lollipop: {fileID: 11400000, guid: 8dc7d9c436fea435981fbdf4fbb38de6, type: 2}
   climb: {fileID: 11400000, guid: 5b8aff5e7d8c559479ebd05b4be261db, type: 2}
   climbed: {fileID: 11400000, guid: 2d02cbe2e5bc4f944a3b509160c5d4b6, type: 2}
+  climbRetract1: {fileID: 11400000, guid: 12155022c8f75f040973fb4215c2d335, type: 2}
+  climbRetract2: {fileID: 11400000, guid: d2a32e8f3aaeac943b8e73f0279dfff5, type: 2}
   vertical: -2
   horizontal: 6
   bargeDelay: 0.274
@@ -123607,7 +123610,7 @@ Rigidbody:
     serializedVersion: 2
     m_Bits: 0
   m_ImplicitCom: 1
-  m_ImplicitTensor: 1
+  m_ImplicitTensor: 0
   m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 0
@@ -217299,7 +217302,7 @@ AudioSource:
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 0}
   m_PlayOnAwake: 1
-  m_Volume: 1
+  m_Volume: 0.15
   m_Pitch: 1
   Loop: 0
   Mute: 0
