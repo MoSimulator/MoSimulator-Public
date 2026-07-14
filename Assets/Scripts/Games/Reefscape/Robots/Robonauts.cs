@@ -19,7 +19,8 @@ namespace Games.Reefscape.Robots
 {
     public class Robonauts : ReefscapeRobotBase
     {
-        [Header("Robot Components")] [SerializeField]
+        [Header("Robot Components")]
+        [SerializeField]
         private GenericJoint armJoint;
 
         [SerializeField] private GenericElevator elevator;
@@ -35,16 +36,19 @@ namespace Games.Reefscape.Robots
         [SerializeField] private RobonautsClimber climber;
         [SerializeField] private ClimbScorer scorer;
 
-        [Header("Physics Rollers")] [SerializeField]
+        [Header("Physics Rollers")]
+        [SerializeField]
         private GenericRoller[] physRollers;
 
-        [Header("PID Constants")] [SerializeField]
+        [Header("PID Constants")]
+        [SerializeField]
         private PidConstants armPidConstants;
 
         [SerializeField] private PidConstants intakePidConstants;
         [SerializeField] private PidConstants algaeArmsPidConstants;
 
-        [Header("Robot Setpoints")] [SerializeField]
+        [Header("Robot Setpoints")]
+        [SerializeField]
         private RobotnautsSetpoint stowSetpoint;
 
         [SerializeField] private RobotnautsSetpoint coralStowSetpoint;
@@ -63,13 +67,14 @@ namespace Games.Reefscape.Robots
         [SerializeField] private RobotnautsSetpoint processorSetpoint;
         [SerializeField] private RobotnautsSetpoint stackAlgaeIntakeSetpoint;
 
-        [Header("Game Piece Intakes")] [SerializeField]
+        [Header("Game Piece Intakes")]
+        [SerializeField]
         private ReefscapeGamePieceIntake coralIntake;
 
         [SerializeField] private ReefscapeGamePieceIntake coralStationIntake;
 
         [SerializeField] private ReefscapeGamePieceIntake algaeIntake;
-        
+
         [Header("Game Piece States")]
         [SerializeField] private GamePieceState coralIntakeState;
         [SerializeField] private GamePieceState coralStowState;
@@ -78,29 +83,32 @@ namespace Games.Reefscape.Robots
         [SerializeField] private GamePieceState coralPreloadState;
         [SerializeField] private GamePieceState algaeStowState;
         [SerializeField] private GamePieceState l1CoralStow;
-        [Header("Audio")] [SerializeField]
+        [Header("Audio")]
+        [SerializeField]
         private AudioSource intakeAudioSource;
         [SerializeField] private AudioClip intakeClip;
         [SerializeField] private AudioSource algaeAudioSource;
         [SerializeField] private AudioClip algaeClip;
 
-        [Header("Target Setpoints")] [SerializeField]
+        [Header("Target Setpoints")]
+        [SerializeField]
         private float targetArmAngle;
 
         [SerializeField] private float targetElevatorHeight;
         [SerializeField] private float targetIntakeAngle;
         [SerializeField] private float targetAlgaeArmsAngle;
 
-        [Header("Intake Wheels")] [SerializeField]
+        [Header("Intake Wheels")]
+        [SerializeField]
         private GenericAnimationJoint[] intakeWheels;
-        
+
         [SerializeField] private float intakeWheelSpeed = 300f;
 
         private RobotGamePieceController<ReefscapeGamePiece, ReefscapeGamePieceData>.GamePieceControllerNode coralController;
         private RobotGamePieceController<ReefscapeGamePiece, ReefscapeGamePieceData>.GamePieceControllerNode algaeController;
 
         private ReefscapeAutoAlign align;
-        
+
         private bool _alreadyPlaced;
         private bool _canIntakeCoral;
         private bool _canBuffer;
@@ -109,10 +117,10 @@ namespace Games.Reefscape.Robots
         private bool StationMode;
 
         private bool _robotSpectialPressed;
-        private bool _isScoring = false; 
+        private bool _isScoring = false;
 
         private ReefscapeSetpoints previousSetpoint = ReefscapeSetpoints.Stow;
-        
+
         private ReefscapeSetpoints? bufferedSetpoint;
 
         protected override void Start()
@@ -126,7 +134,7 @@ namespace Games.Reefscape.Robots
             bargeFlap.SetPid(intakePidConstants);
             algaeSpringL.SetPid(intakePidConstants);
             algaeSpringR.SetPid(intakePidConstants);
-            
+
             targetArmAngle = coralStowSetpoint.armAngle;
             targetElevatorHeight = 0;
             targetIntakeAngle = coralStowSetpoint.intakeAngle;
@@ -141,7 +149,7 @@ namespace Games.Reefscape.Robots
             coralController.intakes.Add(coralIntake);
             coralController.intakes.Add(coralStationIntake);
 
-            algaeController.gamePieceStates = new[] { algaeStowState};
+            algaeController.gamePieceStates = new[] { algaeStowState };
             algaeController.intakes.Add(algaeIntake);
 
             intakeAudioSource.clip = intakeClip;
@@ -179,14 +187,14 @@ namespace Games.Reefscape.Robots
                     roller.flipVelocity();
                 }
             }
-            
+
             if (algaeController.HasPiece() || CurrentSetpoint == ReefscapeSetpoints.Place)
             {
                 algaeRoller.flipVelocity();
             }
 
             UpdateAudio();
-            
+
             algaeController.SetTargetState(algaeStowState);
 
             if (CurrentIntakeMode == ReefscapeIntakeMode.L1 && coralController.HasPiece())
@@ -197,7 +205,7 @@ namespace Games.Reefscape.Robots
                     bufferedSetpoint = null;
                 }
             }
-            
+
             //overide actions
             AlgaeSlider();
             AutoAlignOffsets();
@@ -206,7 +214,7 @@ namespace Games.Reefscape.Robots
 
             //input overides
             ClearBuffers();
-            
+
             //run primary loop
             switch (CurrentSetpoint)
             {
@@ -241,7 +249,7 @@ namespace Games.Reefscape.Robots
                             SetSetpoint(coralStationSetpoint);
                             coralController.RequestIntake(coralStationIntake, (CurrentRobotMode == ReefscapeRobotMode.Coral || algaeController.HasPiece()) && !coralController.HasPiece());
                             coralController.RequestIntake(coralIntake, false);
-                            
+
                         }
                         else
                         {
@@ -254,18 +262,18 @@ namespace Games.Reefscape.Robots
                         {
                             SetRobotMode(ReefscapeRobotMode.Coral);
                         }
-                        
+
                     }
-                    
+
                     algaeController.RequestIntake(algaeIntake, CurrentRobotMode == ReefscapeRobotMode.Algae && algaeController.currentStateNum == 0);
-                    
+
                     break;
                 case ReefscapeSetpoints.Place:
                     if (OuttakeAction.triggered)
                     {
                         if (coralController.HasPiece() && algaeController.HasPiece())
                         {
-                            StartCoroutine(PlaceCoroutine()); 
+                            StartCoroutine(PlaceCoroutine());
                             switch (CurrentRobotMode)
                             {
                                 case ReefscapeRobotMode.Algae:
@@ -279,7 +287,7 @@ namespace Games.Reefscape.Robots
                         }
                         else
                         {
-                            StartCoroutine(PlaceCoroutine()); 
+                            StartCoroutine(PlaceCoroutine());
                         }
                     }
                     break;
@@ -383,13 +391,13 @@ namespace Games.Reefscape.Robots
             {
                 StationMode = false;
             }
-            
+
             if (_wasCoral && !coralController.HasPiece() && !algaeController.HasPiece())
             {
                 SetRobotMode(ReefscapeRobotMode.Coral);
                 _wasCoral = false;
             }
-            
+
             if (previousSetpoint == ReefscapeSetpoints.Place && CurrentSetpoint != ReefscapeSetpoints.Place)
             {
                 _alreadyPlaced = false;
@@ -421,7 +429,7 @@ namespace Games.Reefscape.Robots
             {
                 CurrentCoralStationMode.DropType = DropType.Ground;
             }
-            
+
             _robotSpectialPressed = RobotSpecialAction.IsPressed();
         }
         private void AutoAlignOffsets()
@@ -454,7 +462,7 @@ namespace Games.Reefscape.Robots
             if (CurrentIntakeMode == ReefscapeIntakeMode.L1)
             {
                 coralController.SetTargetState(l1CoralStow);
-            } 
+            }
             else if (StationMode)
             {
                 coralController.SetTargetState(coralStowState);
@@ -508,7 +516,7 @@ namespace Games.Reefscape.Robots
         private IEnumerator PlaceCoroutine()
         {
             if (_alreadyPlaced) yield break;
-            
+
             _isScoring = true;
             PlaceGamePiece();
 
@@ -549,7 +557,7 @@ namespace Games.Reefscape.Robots
                 if (LastSetpoint == ReefscapeSetpoints.L1)
                 {
                     time = 0.15f;
-                    force = CurrentIntakeMode == ReefscapeIntakeMode.L1 ? new Vector3(0.5f,0,0) : new Vector3(0, 0, -0.25f);
+                    force = CurrentIntakeMode == ReefscapeIntakeMode.L1 ? new Vector3(0.5f, 0, 0) : new Vector3(0, 0, -0.25f);
                     maxSpeed = 0.01f;
                 }
                 if (LastSetpoint == ReefscapeSetpoints.L2)

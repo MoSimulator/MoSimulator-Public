@@ -450,6 +450,7 @@ namespace Prefabs.Reefscape.Robots.Mods._4481.Remb
                 {
                     col.enabled = true;
                 }
+
             }
         }
         public IEnumerator SpinCoralRollers()
@@ -491,22 +492,8 @@ namespace Prefabs.Reefscape.Robots.Mods._4481.Remb
         }
         private void PlacePiece()
         {
-            if (_algaeController.HasPiece() && ((CurrentRobotMode == ReefscapeRobotMode.Algae) || (!_coralController.HasPiece() && LastSetpoint == ReefscapeSetpoints.Barge)))
-            {
-                _algaeController.ReleaseGamePieceWithForce(new Vector3(0, horizontal, vertical));
-
-                StartCoroutine(SpinAlgaeRollers());
-
-
-            }
-            else if (CurrentRobotMode == ReefscapeRobotMode.Algae)
-            {
-                _algaeController.ReleaseGamePieceWithForce(new Vector3(0, 2, 0));
-                StartCoroutine(SpinAlgaeRollers());
-            }
-
-
-            else
+            if (_alreadyPlaced) return;
+            if (CurrentRobotMode == ReefscapeRobotMode.Coral && _coralController.HasPiece())
             {
                 if (LastSetpoint == ReefscapeSetpoints.L4)
                 {
@@ -524,7 +511,25 @@ namespace Prefabs.Reefscape.Robots.Mods._4481.Remb
                     _coralController.ReleaseGamePieceWithForce(new Vector3(0, 0, 5));
                     StartCoroutine(SpinCoralRollers());
                 }
+                _alreadyPlaced = true;
             }
+            else if (_algaeController.HasPiece() && LastSetpoint == ReefscapeSetpoints.Barge)
+            {
+
+                _algaeController.ReleaseGamePieceWithForce(new Vector3(0, horizontal, vertical));
+                _alreadyPlaced = true;
+
+
+
+            }
+            else if ((CurrentRobotMode == ReefscapeRobotMode.Algae && _algaeController.HasPiece()) || (!_coralController.HasPiece() && _algaeController.HasPiece()))
+            {
+                _algaeController.ReleaseGamePieceWithForce(new Vector3(0, 0, 1.5f));
+                _alreadyPlaced = true;
+            }
+
+
+
 
         }
         private bool ClimbWristAtSetpoint(Rembrantsetpoint targetSetpoint)
