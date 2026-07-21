@@ -23,7 +23,7 @@ MonoBehaviour:
   hasAlternateRobot: 0
   alternateRobotPrefab: {fileID: 0}
   alternateMainMenuPrefab: {fileID: 0}
-  robotImage: {fileID: 21300000, guid: 4a68627e292ee7b49bf83ee6e21398c4, type: 3}
+  robotImage: {fileID: 21300000, guid: 5de7d5c5e9f19f24bbbbabd200d99881, type: 3}
   tutorialCards:
   - {fileID: 6829736770845459078, guid: 82c9aeba2163f3a40875a3c3f9d16ee5, type: 3}
   - {fileID: 6829736770845459078, guid: 6d88ef0a051098f4c9f966c7bf817596, type: 3}

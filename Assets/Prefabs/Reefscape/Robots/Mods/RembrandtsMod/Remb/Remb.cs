@@ -200,6 +200,7 @@ namespace Prefabs.Reefscape.Robots.Mods._4481.Remb
             {
                 retractingClimb = false;
             }
+            CurrentCoralStationMode.DropDistance = 0;
             switch (CurrentSetpoint)
             {
                 case ReefscapeSetpoints.Stow:
@@ -223,8 +224,11 @@ namespace Prefabs.Reefscape.Robots.Mods._4481.Remb
                         retractingClimb = true;
                         break;
                     }
-                    // _algaeController.RequestIntake(algaeIntake, true);
-                    _coralController.RequestIntake(coralIntake, true);
+                    if (ArmAtSetpoint(stow) && ElevatorAtSetpoint(stow))
+                    {
+                        CurrentCoralStationMode.DropDistance = 1.45f;
+                        _coralController.RequestIntake(coralIntake, true);
+                    }
                     _coralController.SetTargetState(coralStowState);
                     if ((CurrentRobotMode == ReefscapeRobotMode.Coral && !hasCoral) ||
                     (LastSetpoint == ReefscapeSetpoints.Barge && !hasAlgae) ||
@@ -528,10 +532,24 @@ namespace Prefabs.Reefscape.Robots.Mods._4481.Remb
                 _alreadyPlaced = true;
             }
 
-
-
-
         }
+
+        private bool ElevatorAtSetpoint(Rembrantsetpoint targetSetpoint)
+        {
+            bool elevatorAtSetpoint = Utils.InRange(elevator.GetElevatorHeight(), targetSetpoint.elevatorHeight, 2f);
+
+            return elevatorAtSetpoint;
+        }
+
+        private bool ArmAtSetpoint(Rembrantsetpoint targetSetpoint)
+        {
+            bool armAtSetpoint = Utils.InAngularRange(arm.GetSingleAxisAngle(JointAxis.X), targetSetpoint.armAngle, 2f);
+
+            return armAtSetpoint;
+        }
+
+
+
         private bool ClimbWristAtSetpoint(Rembrantsetpoint targetSetpoint)
         {
             bool climbAtSetpoint = Utils.InAngularRange(climbWrist.GetSingleAxisAngle(JointAxis.X), targetSetpoint.climbWristAngle, 2f);
