@@ -20,8 +20,9 @@ MonoBehaviour:
     type: 3}
   mainMenuPrefab: {fileID: 2534371394911199621, guid: b9a8983815c5b3b49b7deb7c287bdfd6,
     type: 3}
-  hasAlternateRobot: 0
-  alternateRobotPrefab: {fileID: 0}
+  hasAlternateRobot: 1
+  alternateRobotPrefab: {fileID: 2534371394911199621, guid: 30888f11f705eb147815a92a19def5d4,
+    type: 3}
   alternateMainMenuPrefab: {fileID: 0}
   robotImage: {fileID: 21300000, guid: 5de7d5c5e9f19f24bbbbabd200d99881, type: 3}
   tutorialCards:
