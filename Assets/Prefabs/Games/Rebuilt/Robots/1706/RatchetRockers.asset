@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: be1409438a6844eea96767966da7413b, type: 3}
+  m_Name: RatchetRockers
+  m_EditorClassIdentifier: 
+  teamNumber: 1706
+  teamName: RachetRockers
+  robotImage: {fileID: 21300000, guid: e45eccd5e1dd7394ca06670690f03caf, type: 3}
+  mainRobot:
+    displayName: 
+    robotPrefab: {fileID: 4108337974173178762, guid: e0a793c2864484401b8a64549ce8f74b,
+      type: 3}
+    mainMenuPrefab: {fileID: 4108337974173178762, guid: 198c9b4823bfd4941a593337f5048dcf,
+      type: 3}
+    spawnSelectionPrefab: {fileID: 4108337974173178762, guid: 8d079ad30fbca4d1bb09ef05f4c40438,
+      type: 3}
+    preloadGamePiece: {fileID: 2886892246794840118, guid: 96adc4350dc09d942b6bf56af73710ca,
+      type: 3}
+    tutorialCards:
+    - {fileID: 6829736770845459078, guid: f555ea1895885411b88416674abdaa63, type: 3}
+    - {fileID: 6829736770845459078, guid: 890b2f729aa7c44c4ad247a3fea61faf, type: 3}
+    - {fileID: 6829736770845459078, guid: 50e1038fa59f649ecbf7703f7128ae42, type: 3}
+  alternateRobots: []

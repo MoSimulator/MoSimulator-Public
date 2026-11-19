@@ -1,0 +1,9 @@
+using UnityEngine;
+
+    #ROOTNAMESPACEBEGIN#
+[CreateAssetMenu(fileName = "Setpoint", menuName = "Games/Reefscape/#MODPACKNAME#/#SETPOINTTYPE#", order = 0)]
+public class #SETPOINTTYPE# : ScriptableObject
+{
+    // TODO: Add the mechanism targets required by this robot.
+}
+#ROOTNAMESPACEEND#

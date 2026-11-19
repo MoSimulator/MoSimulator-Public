@@ -1,11 +1,6 @@
 fileFormatVersion: 2
-<<<<<<<< HEAD:Assets/Materials/BargePanels.mat.meta
 guid: 2663954cc6588414d93edecc9eb35c40
 NativeFormatImporter:
-========
-guid: d84e21cf180eef64ebd5f5bb06e05723
-PrefabImporter:
->>>>>>>> main:Assets/Materials/LEds/LED Strip.prefab.meta
   externalObjects: {}
   mainObjectFileID: 2100000
   userData: 

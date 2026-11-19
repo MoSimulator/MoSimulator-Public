@@ -42,6 +42,12 @@ namespace MoSimCore.BaseClasses.GameManagement
         public bool wasCheated = false;
 
         /// <summary>
+        /// Whether the game has finished whatever loading it does before a match can start. Override
+        /// in a game that builds something up front, so the clock does not run while it is loading.
+        /// </summary>
+        protected virtual bool IsReady => true;
+
+        /// <summary>
         /// Initializes the singleton instance and sets up manager components.
         /// Override to add game-specific initialization.
         /// </summary>
@@ -58,8 +64,30 @@ namespace MoSimCore.BaseClasses.GameManagement
             
             if (TimerManager != null)
             {
-                TimerManager.StartMatch();
+                if (IsReady)
+                {
+                    TimerManager.StartMatch();
+                }
+                else
+                {
+                    StartCoroutine(StartMatchWhenReady());
+                }
             }
+        }
+
+        /// <summary>
+        /// Holds the match until <see cref="IsReady"/> comes up. The timer has to be reset and paused
+        /// first: nothing has set the clock yet, and its own Update would otherwise run it straight
+        /// from zero into <see cref="GameState.End"/> with the robots enabled before the wait is over.
+        /// </summary>
+        private IEnumerator StartMatchWhenReady()
+        {
+            TimerManager.ResetTimer();
+            TimerManager.PauseTimer();
+
+            yield return new WaitUntil(() => IsReady);
+
+            TimerManager.StartMatch();
         }
         
         /// <summary>
@@ -113,6 +141,12 @@ namespace MoSimCore.BaseClasses.GameManagement
             wasCheated = false;
             DestroyObjects();
             yield return PerformGameSpecificReset();
+
+            if (!IsReady)
+            {
+                yield return new WaitUntil(() => IsReady);
+            }
+
             TimerManager.StartMatch();
             IsResetting = false;
         }

@@ -1,5 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 using UnityEngine;
 
 namespace MoSimLib
@@ -191,65 +194,58 @@ namespace MoSimLib
             return a >= minBound && a <= maxBound;
         }
         
-        public static void AddParentLookUpFast(GameObject child, Component parent)
-        {
-            ParentComponentCache.TryAdd(child, parent);
-        }
-    
-        private static readonly Dictionary<GameObject, Component> ParentComponentCache = new Dictionary<GameObject, Component>();
+        private static readonly Dictionary<int, Dictionary<(Type, bool), Component>> Cache = new();
 
-        /// <summary>
-        /// Finds the first Parent objcet which contains a object T
-        /// </summary>
-        /// <param name="value"></param>
-        /// <param name="child"></param>
-        /// <returns></returns>
-        public static T FindParentObjectComponent<T>(GameObject child) where T : Component
+        public static T FindParentObjectComponent<T>(GameObject child, bool includeSelf = false) where T : Component
         {
-            // 1. Check the cache first
-            if (ParentComponentCache.TryGetValue(child, out Component cachedComponent) && cachedComponent is T resultT)
+            if (child == null) return null;
+
+            int childId = child.GetInstanceID();
+            var key = (typeof(T), includeSelf);
+
+            // 1. Check Cache
+            if (Cache.TryGetValue(childId, out var typeDict) && typeDict.TryGetValue(key, out var cachedComponent))
             {
-                return resultT;
+                return cachedComponent as T;
             }
 
-            // 2. Perform the expensive traversal
-            T foundComponent = FindParentObjectComponentActual<T>(child);
+            // 2. Expensive Traversal
+            T foundComponent = FindParentObjectComponentActual<T>(child, includeSelf);
 
-            // 3. Cache the result (even if null)
+            // 3. Cache the result
             if (foundComponent != null)
             {
-                ParentComponentCache[child] = foundComponent;
-            }
-            else
-            {
-                // Cache a marker for "not found" to prevent future null searches
-                // A common technique is to cache a known dummy component or null, 
-                // but for simplicity here we'll just skip caching null for now
-                // as it would require more complex cache management.
+                if (typeDict == null)
+                {
+                    typeDict = new Dictionary<(Type, bool), Component>();
+                    Cache[childId] = typeDict;
+                }
+                typeDict[key] = foundComponent;
             }
 
             return foundComponent;
         }
-        
-        private static T FindParentObjectComponentActual<T>(GameObject child) where T : Component
-        {
-            if (child == null)
-            {
-                return null;
-            }
 
-            Transform currentTransform = child.transform.parent;
+        private static T FindParentObjectComponentActual<T>(GameObject child, bool includeSelf) where T : Component
+        {
+            Transform currentTransform = includeSelf ? child.transform : child.transform.parent;
 
             while (currentTransform != null)
             {
-                T component = currentTransform.GetComponent<T>();
-                if (component)
+                // Non-allocating component check
+                if (currentTransform.TryGetComponent<T>(out T component))
                 {
                     return component;
                 }
                 currentTransform = currentTransform.parent;
             }
             return null;
+        }
+
+        // Call this when scenes change or objects are destroyed to free RAM
+        public static void ClearCache()
+        {
+            Cache.Clear();
         }
     
         /// <summary>
@@ -287,6 +283,173 @@ namespace MoSimLib
             deriv.w -= derivError.w;		
 		
             return new Quaternion(result.x, result.y, result.z, result.w);
+        }
+        
+        public static List<GameObject> FindGameObjectsOnLayer(string layerName)
+        {
+            // 1. Get the integer ID for the layer name.
+            int layerID = LayerMask.NameToLayer(layerName);
+
+            // Check if the layer name is valid (returns -1 if invalid).
+            if (layerID == -1)
+            {
+                Debug.LogWarning($"Layer '{layerName}' not found in Unity's layer settings.");
+                return new List<GameObject>();
+            }
+
+            // 2. Find all active GameObjects in the scene.
+            // NOTE: This can be a slow operation and shouldn't be called every frame (e.g., in Update).
+            GameObject[] allGameObjects = UnityEngine.Object.FindObjectsByType<GameObject>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+
+            // 3. Filter the array to only include objects on the target layer.
+            List<GameObject> objectsOnLayer = allGameObjects
+                .Where(go => go.layer == layerID)
+                .ToList();
+
+            return objectsOnLayer;
+        }
+        
+        public static T GetStringToEnum<T>(string stringName) where T : struct, Enum
+        {
+            if (string.IsNullOrEmpty(stringName)) return default;
+
+            var enumNames = Enum.GetNames(typeof(T));
+
+            var match = enumNames.FirstOrDefault(name => 
+                stringName.Contains(name, StringComparison.OrdinalIgnoreCase));
+
+            if (match != null && Enum.TryParse<T>(match, true, out var result))
+            {
+                return result;
+            }
+
+            return default;
+        }
+
+        #region Collision ignoring
+
+        /// <summary>
+        /// Ignores or restores collisions between all colliders on two rigidbodies.
+        /// </summary>
+        public static void IgnoreCollisionsBetween(Rigidbody rbA, Rigidbody rbB, bool ignore = true)
+        {
+            if (rbA == null || rbB == null)
+            {
+                Debug.LogWarning("IgnoreCollisionsBetween: one or both rigidbodies are null.");
+                return;
+            }
+
+            IgnoreCollisionsBetween(rbA.GetComponentsInChildren<Collider>(), rbB.GetComponentsInChildren<Collider>(), ignore);
+        }
+
+        /// <summary>
+        /// Ignores or restores collisions between two arbitrary sets of colliders.
+        /// </summary>
+        public static void IgnoreCollisionsBetween(Collider[] collidersA, Collider[] collidersB, bool ignore = true)
+        {
+            if (collidersA == null || collidersB == null) return;
+
+            foreach (var colA in collidersA)
+            {
+                if (colA == null) continue;
+
+                foreach (var colB in collidersB)
+                {
+                    if (colB != null)
+                        Physics.IgnoreCollision(colA, colB, ignore);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Ignores or restores collisions between a collider and all colliders on a rigidbody.
+        /// </summary>
+        public static void IgnoreCollisionsBetween(Collider colA, Rigidbody rbB, bool ignore = true)
+        {
+            if (colA == null || rbB == null)
+            {
+                Debug.LogWarning("IgnoreCollisionsBetween: collider or rigidbody is null.");
+                return;
+            }
+
+            IgnoreCollisionsBetween(new[] { colA }, rbB.GetComponentsInChildren<Collider>(), ignore);
+        }
+
+        /// <summary>
+        /// Ignores or restores collisions between two colliders.
+        /// </summary>
+        public static void IgnoreCollisionsBetween(Collider colA, Collider colB, bool ignore = true)
+        {
+            if (colA == null || colB == null)
+            {
+                Debug.LogWarning("IgnoreCollisionsBetween: one or both colliders are null.");
+                return;
+            }
+
+            Physics.IgnoreCollision(colA, colB, ignore);
+        }
+
+        /// <summary>
+        /// Ignores or restores collisions between one rigidbody and a collection of rigidbodies.
+        /// </summary>
+        public static void IgnoreCollisionsBetween(Rigidbody rbA, IEnumerable<Rigidbody> others, bool ignore = true)
+        {
+            if (rbA == null || others == null) return;
+
+            foreach (var rbB in others)
+                IgnoreCollisionsBetween(rbA, rbB, ignore);
+        }
+
+        /// <summary>
+        /// Ignores or restores collisions between colliders and all colliders on a rigidbody.
+        /// </summary>
+        public static void IgnoreCollisionsBetween(Collider[] collidersA, Rigidbody rbB, bool ignore = true)
+        {
+            if (collidersA == null || rbB == null)
+            {
+                Debug.LogWarning("IgnoreCollisionsBetween: colliders array or rigidbody is null.");
+                return;
+            }
+
+            IgnoreCollisionsBetween(collidersA, rbB.GetComponentsInChildren<Collider>(), ignore);
+        }
+
+        /// <summary>
+        /// Ignores or restores collisions between a rigidbody and a set of colliders.
+        /// </summary>
+        public static void IgnoreCollisionsBetween(Rigidbody rbA, Collider[] collidersB, bool ignore = true)
+        {
+            if (rbA == null || collidersB == null)
+            {
+                Debug.LogWarning("IgnoreCollisionsBetween: rigidbody or colliders array is null.");
+                return;
+            }
+
+            IgnoreCollisionsBetween(rbA.GetComponentsInChildren<Collider>(), collidersB, ignore);
+        }
+
+        public static void UnignoreCollisionsBetween(Rigidbody rbA, Rigidbody rbB) => IgnoreCollisionsBetween(rbA, rbB, false);
+        public static void UnignoreCollisionsBetween(Collider[] collidersA, Collider[] collidersB) => IgnoreCollisionsBetween(collidersA, collidersB, false);
+        public static void UnignoreCollisionsBetween(Collider colA, Rigidbody rbB) => IgnoreCollisionsBetween(colA, rbB, false);
+        public static void UnignoreCollisionsBetween(Collider colA, Collider colB) => IgnoreCollisionsBetween(colA, colB, false);
+        public static void UnignoreCollisionsBetween(Rigidbody rbA, IEnumerable<Rigidbody> others) => IgnoreCollisionsBetween(rbA, others, false);
+        public static void UnignoreCollisionsBetween(Collider[] collidersA, Rigidbody rbB) => IgnoreCollisionsBetween(collidersA, rbB, false);
+        public static void UnignoreCollisionsBetween(Rigidbody rbA, Collider[] collidersB) => IgnoreCollisionsBetween(rbA, collidersB, false);
+
+        #endregion
+        
+        /// <summary>
+        /// Creates a deterministic GUID based on the provided seed string.
+        /// </summary>
+        /// <param name="seed">Seed used to create a GUID hash code.</param>
+        /// <returns>The GUID hash code from the provided seed.</returns>
+        public static Guid CreateDeterministicGuid(string seed)
+        {
+            seed ??= string.Empty;
+
+            using var md5 = MD5.Create();
+            var hash = md5.ComputeHash(Encoding.UTF8.GetBytes(seed));
+            return new Guid(hash);
         }
     }
 }

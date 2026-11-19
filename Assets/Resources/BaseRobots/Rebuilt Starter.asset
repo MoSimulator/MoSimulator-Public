@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e031b48ae5c148f090b1cba3d1097ada, type: 3}
+  m_Name: Rebuilt Starter
+  m_EditorClassIdentifier: 
+  modpackName: Rebuilt Starter Pack
+  modpackVersion: 1.0.0
+  authorName: Cascade Studios
+  description: 
+  thumbnail: {fileID: 21300000, guid: 50fbe81f016674daab05c563d19fbddf, type: 3}
+  robots:
+  - {fileID: 11400000, guid: a904d77fc3aa840459780bc9eb745b7f, type: 2}

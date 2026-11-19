@@ -1,4 +1,5 @@
 using System;
+using MoSimLib;
 using RobotFramework.Controllers.PidSystems;
 using RobotFramework.Enums;
 using UnityEngine;
@@ -188,7 +189,15 @@ namespace RobotFramework.Components
             CheckContinuousElevatorClicks();
         }
 
-        public void SetTarget(float target)
+        public MoSimResult<MoSimLib.Void> SetTarget(float target)
+        {
+            var version = MoSim.ActiveVersion;
+
+            SetTargetV1(target);
+            return MoSimResult<MoSimLib.Void>.Success(new MoSimLib.Void());
+        }
+
+        private void SetTargetV1(float target)
         {
             switch (elevatorType)
             {
@@ -245,7 +254,14 @@ namespace RobotFramework.Components
             }
         }
 
-        public static float GetLocationOnAxis(JointAxis jointAxis, Vector3 setTransform)
+        public static MoSimResult<float> GetLocationOnAxis(JointAxis jointAxis, Vector3 setTransform)
+        {
+            var version = MoSim.ActiveVersion;
+
+            return MoSimResult<float>.Success(GetLocationOnAxisV1(jointAxis, setTransform));
+        }
+
+        private static float GetLocationOnAxisV1(JointAxis jointAxis, Vector3 setTransform)
         {
             return jointAxis switch
             {
@@ -350,7 +366,14 @@ namespace RobotFramework.Components
             }
         }
 
-        public float GetElevatorHeight()
+        public MoSimResult<float> GetElevatorHeight()
+        {
+            var version = MoSim.ActiveVersion;
+
+            return MoSimResult<float>.Success(GetElevatorHeightV1());
+        }
+
+        private float GetElevatorHeightV1()
         {
             if (elevatorType == ElevatorType.Cascade)
             {
@@ -372,7 +395,14 @@ namespace RobotFramework.Components
             }
         }
 
-        public float GetContinuousTargetHeight(float targetHeight = 0f)
+        public MoSimResult<float> GetContinuousTargetHeight(float targetHeight = 0f)
+        {
+            var version = MoSim.ActiveVersion;
+
+            return MoSimResult<float>.Success(GetContinuousTargetHeightV1(targetHeight));
+        }
+
+        private float GetContinuousTargetHeightV1(float targetHeight = 0f)
         {
             if (elevatorType != ElevatorType.Continuous)
             {

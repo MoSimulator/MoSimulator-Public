@@ -8,7 +8,7 @@ namespace GameSystems.Cameras
     {
         private void Update()
         {
-            if (TargetRobot != null)
+            if (TargetRobot != null && Vcam != null && Vcam.Follow != TargetRobot)
             {
                 Vcam.Follow = TargetRobot;
                 Vcam.LookAt = TargetRobot;

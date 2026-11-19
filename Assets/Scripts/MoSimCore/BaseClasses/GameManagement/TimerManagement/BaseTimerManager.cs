@@ -64,7 +64,10 @@ namespace MoSimCore.BaseClasses.GameManagement.TimerManagement
         public DateTime GameStartTimeStamp { get; protected set; }
 
         /// <summary>Maximum discrepancy between the DateTime and the game timer, in seconds</summary>
-        [SerializeField] private float maximumTimestampDiscrepancy = 1f;
+        [SerializeField] private float maximumTimestampDiscrepancy = 1.5f;
+
+        private DateTime _lastRealTime;
+        private double _timeDrift;
         
         /// <summary>
         /// Subscribes to match end event for endgame handling.
@@ -81,7 +84,9 @@ namespace MoSimCore.BaseClasses.GameManagement.TimerManagement
         public virtual void StartMatch()
         {
             Timer = MatchDuration;
-            GameStartTimeStamp = DateTime.Now;
+            GameStartTimeStamp = DateTime.UtcNow;
+            _lastRealTime = GameStartTimeStamp;
+            _timeDrift = 0;
             BaseGameManager.Instance.wasCheated = false;
             CurrentGameState = GameState.Auto;
             CurrentRobotState = RobotState.Enabled;
@@ -113,20 +118,65 @@ namespace MoSimCore.BaseClasses.GameManagement.TimerManagement
             Timer -= Time.deltaTime;
             CheckStateTransitions();
             OnTimerUpdated?.Invoke(Timer);
-            
-            // Check for & flag discrepancies between elapsed DateTime and the Timer
-            if (CurrentGameState == GameState.Auto) {
-                if (Math.Abs(Math.Abs(MatchDuration - Timer) - Math.Abs((DateTime.Now - GameStartTimeStamp).TotalSeconds)) > maximumTimestampDiscrepancy)
-                {
-                    BaseGameManager.Instance.wasCheated = true;
-                }
-            } else {
-                // TODO: The `-3` listed here comes from the transition time between auto and TeleOp. It is hardcoded to be 3 seconds in ReefscapeTimerManager, so it's not possible to have it adapt or generalized between games
-                if (Math.Abs(Math.Abs(MatchDuration - Timer) - Math.Abs((DateTime.Now - GameStartTimeStamp).TotalSeconds - 3)) > maximumTimestampDiscrepancy)
-                {
-                    BaseGameManager.Instance.wasCheated = true;
-                }
+            CheckTimeDrift();
+        }
+
+        /// <summary>
+        /// Flags a match where the game clock and the wall clock disagree. Measured frame to frame
+        /// rather than against the match start, because a hitch or a load stall loses real time the
+        /// game clock can never make up, and measuring from the start turned that permanent gap into a
+        /// cheat flag. Frames longer than Unity's own delta cap are left out, since deltaTime is
+        /// clamped there and stops describing the frame - which also covers the auto to teleop pause,
+        /// so its length no longer has to be hardcoded here. Leaving the game is caught by
+        /// <see cref="OnApplicationFocus"/> rather than by drift, so forgiving a long frame here does
+        /// not forgive an alt-tab.
+        /// </summary>
+        private void CheckTimeDrift()
+        {
+            // UtcNow, so a DST change or a clock sync mid-match does not read as tampering.
+            var now = DateTime.UtcNow;
+            var realDelta = (now - _lastRealTime).TotalSeconds;
+            _lastRealTime = now;
+
+            if (realDelta > Time.maximumDeltaTime)
+            {
+                return;
             }
+
+            _timeDrift += Time.deltaTime - realDelta;
+
+            if (Math.Abs(_timeDrift) > maximumTimestampDiscrepancy)
+            {
+                BaseGameManager.Instance.wasCheated = true;
+            }
+        }
+
+        /// <summary>
+        /// Flags the match when the window loses focus while it is still running. Leaving mid-run is
+        /// treated as tampering by design, and it is caught here rather than through the clock drift
+        /// so that an honest frame hitch stays forgiven.
+        /// </summary>
+        private void OnApplicationFocus(bool hasFocus)
+        {
+            if (!hasFocus && IsMatchLive())
+            {
+                BaseGameManager.Instance.wasCheated = true;
+            }
+        }
+
+        /// <summary>Same as losing focus, for the platforms that report a minimise as a pause.</summary>
+        private void OnApplicationPause(bool isPaused)
+        {
+            if (isPaused && IsMatchLive())
+            {
+                BaseGameManager.Instance.wasCheated = true;
+            }
+        }
+
+        /// <summary>True while a match is under way and can still be flagged.</summary>
+        private bool IsMatchLive()
+        {
+            return BaseGameManager.Instance != null && CurrentGameState != GameState.End;
         }
 
         /// <summary>

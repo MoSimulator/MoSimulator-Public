@@ -130,7 +130,14 @@ namespace RobotFramework.Components
             }
         }
 
-        public void RemovePiece()
+        public MoSimResult<MoSimLib.Void> RemovePiece()
+        {
+            var version = MoSim.ActiveVersion;
+            RemovePieceV1();
+            return MoSimResult<MoSimLib.Void>.Success(new MoSimLib.Void());
+        }
+
+        private void RemovePieceV1()
         {
             requestIntake = false;
             hasGamePiece = false;
@@ -140,12 +147,26 @@ namespace RobotFramework.Components
             securedGamePiece = false;
         }
 
-        public void ChangeTarget(Transform newTarget)
+        public MoSimResult<MoSimLib.Void> ChangeTarget(Transform newTarget)
+        {
+            var version = MoSim.ActiveVersion;
+            ChangeTargetV1(newTarget);
+            return MoSimResult<MoSimLib.Void>.Success(new MoSimLib.Void());
+        }
+
+        private void ChangeTargetV1(Transform newTarget)
         {
             target = newTarget;
         }
 
-        public void setForce(float Force)
+        public MoSimResult<MoSimLib.Void> setForce(float Force)
+        {
+            var version = MoSim.ActiveVersion;
+            SetForceV1(Force);
+            return MoSimResult<MoSimLib.Void>.Success(new MoSimLib.Void());
+        }
+
+        private void SetForceV1(float Force)
         {
             intakeForce = Force;
         }
@@ -247,25 +268,37 @@ namespace RobotFramework.Components
 
         private void DrawAABBGizmo()
         {
-            if (target == null || !usePlanarTolerancing)
+            if (target == null)
                 return;
 
-            // Store the original gizmo matrix
-            Matrix4x4 originalMatrix = Gizmos.matrix;
+            if (usePlanarTolerancing)
+            {
+                // Store the original gizmo matrix
+                Matrix4x4 originalMatrix = Gizmos.matrix;
 
-            // Set the gizmo matrix to match the center transform's position, rotation, and scale
-            Gizmos.matrix = Matrix4x4.TRS(target.position, target.rotation, Vector3.one);
+                // Set the gizmo matrix to match the center transform's position, rotation, and scale
+                Gizmos.matrix = Matrix4x4.TRS(target.position, target.rotation, Vector3.one);
 
-            // Set gizmo color
-            Gizmos.color = _gizmoColor;
+                // Set gizmo color
+                Gizmos.color = _gizmoColor;
 
-            // Reset color for wireframe
-            Gizmos.color = _gizmoColor;
-            DrawWireCubeWithDepth(Vector3.zero, boxExtents);
+                // Reset color for wireframe
+                Gizmos.color = _gizmoColor;
+                DrawWireCubeWithDepth(Vector3.zero, boxExtents);
 
 
-            // Restore the original gizmo matrix
-            Gizmos.matrix = originalMatrix;
+                // Restore the original gizmo matrix
+                Gizmos.matrix = originalMatrix;
+            }
+            else
+            {
+                // Set gizmo color
+                Gizmos.color = _gizmoColor;
+
+                // Reset color for wireframe
+                Gizmos.color = _gizmoColor;
+                Gizmos.DrawWireSphere(target.position, accuracy * 0.0254f);
+            }
         }
 
         private void DrawWireCubeWithDepth(Vector3 center, Vector3 size)

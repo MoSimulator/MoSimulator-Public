@@ -5,15 +5,27 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 0
+  - enabled: 1
     path: Assets/Scenes/LoadingScreen.unity
     guid: 25106c280ce200a4da7a970b40988053
   - enabled: 0
-    path: Assets/Scenes/MainMenu.unity
+    path: Assets/Scenes/Rebuilt/MainMenuRebuilt.unity
+    guid: 5422f5793341d704f9d5e30cb49b588b
+  - enabled: 1
+    path: Assets/Scenes/Rebuilt/Rebuilt.unity
+    guid: e2a2b4508f3e52a4e9fb3bb63a819d75
+  - enabled: 0
+    path: Assets/Scenes/Reefscape/MainMenuReefscape.unity
     guid: 6536108c2b57c494bbb276e8586432eb
   - enabled: 1
-    path: Assets/Scenes/Reefscape.unity
+    path: Assets/Scenes/Reefscape/Reefscape.unity
     guid: 39adf27395e541e49af44545c6105755
+  - enabled: 0
+    path: Assets/Scenes/Crescendo/MainMenuCrescendo.unity
+    guid: 5d335de82f6a91445a1f2d9a94270634
+  - enabled: 0
+    path: Assets/Scenes/Crescendo/Crescendo.unity
+    guid: 90a8481312c939e498eee074bfe5d7d6
   m_configObjects:
     com.unity.addressableassets: {fileID: 11400000, guid: ed97ea78d2b8a074d962476d62ad6f33,
       type: 2}

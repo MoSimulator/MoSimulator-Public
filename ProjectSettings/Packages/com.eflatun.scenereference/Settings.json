@@ -1,0 +1,51 @@
+{
+    "m_Dictionary": {
+        "m_DictionaryValues": [
+            {
+                "type": "Eflatun.SceneReference.Editor.SceneDataMapsGeneratorTriggers, Eflatun.SceneReference.Editor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+                "key": "SceneDataMaps.GenerationTriggers",
+                "value": "{\"m_Value\":-1}"
+            },
+            {
+                "type": "Eflatun.SceneReference.LogLevel, Eflatun.SceneReference, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+                "key": "Logging.EditorLogLevel",
+                "value": "{\"m_Value\":20}"
+            },
+            {
+                "type": "Newtonsoft.Json.Formatting, Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed",
+                "key": "SceneDataMaps.JsonFormatting",
+                "value": "{\"m_Value\":0}"
+            },
+            {
+                "type": "System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089",
+                "key": "UtilityIgnores.ColoringIgnoresPatterns",
+                "value": "{\"m_Value\":\"\"}"
+            },
+            {
+                "type": "System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089",
+                "key": "UtilityIgnores.ToolboxIgnoresPatterns",
+                "value": "{\"m_Value\":\"\"}"
+            },
+            {
+                "type": "Eflatun.SceneReference.Editor.UtilityIgnoreMode, Eflatun.SceneReference.Editor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+                "key": "UtilityIgnores.ToolboxIgnoreMode",
+                "value": "{\"m_Value\":0}"
+            },
+            {
+                "type": "Eflatun.SceneReference.Editor.UtilityIgnoreMode, Eflatun.SceneReference.Editor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null",
+                "key": "UtilityIgnores.ColoringIgnoreMode",
+                "value": "{\"m_Value\":0}"
+            },
+            {
+                "type": "System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089",
+                "key": "PropertyDrawer.ShowInlineToolbox",
+                "value": "{\"m_Value\":true}"
+            },
+            {
+                "type": "System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089",
+                "key": "PropertyDrawer.ColorBasedOnSceneInBuildState",
+                "value": "{\"m_Value\":true}"
+            }
+        ]
+    }
+}

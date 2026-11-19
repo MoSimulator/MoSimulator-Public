@@ -1,4 +1,6 @@
-﻿﻿using MoSimCore.Interfaces;
+﻿﻿using System.Collections;
+using MoSimCore.BaseClasses.GameManagement;
+using MoSimCore.Interfaces;
 using UnityEngine;
 
 namespace MoSimCore.BaseClasses
@@ -10,6 +12,34 @@ namespace MoSimCore.BaseClasses
     /// <typeparam name="T">The type of score data, must implement IScoreData.</typeparam>
     public abstract class BaseScoreUI<T> : MonoBehaviour where T : IScoreData
     {
+        [SerializeField]
+        [Tooltip("Shown when the match is flagged as cheated - typically the ScoringUI and ScoringSummary " +
+                 "flags. Scores are left alone; the flag marks the match rather than hiding what happened " +
+                 "in it.")]
+        private GameObject[] anticheatFlags;
+
+        /// <summary>
+        /// Shows or hides the cheated flags. Lives here so every game gets it from one place, and takes
+        /// a list because the same state drives the flag on both the live UI and the summary.
+        /// </summary>
+        protected void UpdateAnticheatFlags()
+        {
+            if (anticheatFlags == null)
+            {
+                return;
+            }
+
+            var cheated = BaseGameManager.Instance != null && BaseGameManager.Instance.wasCheated;
+
+            foreach (var flag in anticheatFlags)
+            {
+                if (flag != null && flag.activeSelf != cheated)
+                {
+                    flag.SetActive(cheated);
+                }
+            }
+        }
+
         /// <summary>
         /// Updates the total score displays for both alliances.
         /// Implement this to show the overall point totals.
@@ -45,6 +75,34 @@ namespace MoSimCore.BaseClasses
             UpdateTotalScores(blueScore, redScore);
             UpdateDetailedScores(blueScore, redScore);
             UpdateGamePieceCounters(blueScore, redScore);
+            UpdateAnticheatFlags();
+        }
+        
+        protected static IEnumerator FadeCanvasGroup(CanvasGroup canvasGroup, float initialAlpha, float targetAlpha,
+            float duration, bool disableOnComplete)
+        {
+            if (disableOnComplete && !canvasGroup.gameObject.activeSelf)
+            {
+                yield break;
+            }
+            
+            var elapsedTime = 0f;
+            canvasGroup.alpha = initialAlpha;
+            canvasGroup.gameObject.SetActive(true);
+
+            while (elapsedTime < duration)
+            {
+                elapsedTime += Time.deltaTime;
+                canvasGroup.alpha = Mathf.Lerp(initialAlpha, targetAlpha, elapsedTime / duration);
+                yield return null;
+            }
+
+            canvasGroup.alpha = targetAlpha;
+
+            if (disableOnComplete && Mathf.Approximately(targetAlpha, 0f))
+            {
+                canvasGroup.gameObject.SetActive(false);
+            }
         }
     }
 }

@@ -1,4 +1,7 @@
+using System;
 using System.Collections.Generic;
+using MoSimCore.GameSelection;
+using MoSimLib;
 using UnityEngine;
 
 namespace RobotFramework
@@ -7,74 +10,82 @@ namespace RobotFramework
     /// ScriptableObject that holds metadata for a robot.
     /// Inherit and create concrete assets per game. DO NOT INSTANTIATE THIS TYPE IN CODE.
     /// </summary>
-    public class RobotMetadataSO : ScriptableObject, IRobotMetadata
+    public abstract class RobotMetadataSO : ScriptableObject
     {
         // Identity
-        [Header("Identity")]
-        [SerializeField]
-        [Tooltip("The team number associated with this robot.")]
+        [Header("Identity")] [SerializeField] [Tooltip("The team number associated with this robot.")]
         private int teamNumber;
 
-        [SerializeField]
-        [Tooltip("The team name associated with this robot.")]
+        [SerializeField] [Tooltip("The team name associated with this robot.")]
         private string teamName;
 
-        // Prefabs
-        [Header("Prefabs")]
-        [SerializeField]
-        [Tooltip("The main robot prefab GameObject that will be instantiated in the game scene.")]
-        private GameObject robotPrefab;
-
-        [SerializeField]
-        [Tooltip("The game piece the robot starts with preloaded (optional).")]
-        private GameObject robotPreloadGamePiece;
-
-        [SerializeField]
-        [Tooltip("The prefab to display in the main menu for robot selection.")]
-        private GameObject mainMenuPrefab;
-
-        // Alternate Variant
-        [Header("Alternate Variant")]
-        [SerializeField]
-        [Tooltip("Whether this robot has an alternate configuration/variant.")]
-        private bool hasAlternateRobot;
-
-        [SerializeField]
-        [Tooltip("The alternate robot prefab (used when HasAlternateRobot is true).")]
-        private GameObject alternateRobotPrefab;
-
-        [SerializeField]
-        [Tooltip("The alternate main menu prefab (used when HasAlternateRobot is true).")]
-        private GameObject alternateMainMenuPrefab;
-
-        // UI & Tutorial
-        [Header("UI & Tutorial")]
-        [SerializeField]
-        [Tooltip("The image/icon representing this robot in UI elements.")]
+        [SerializeField] [Tooltip("The image/icon representing this robot in UI elements.")]
         private Sprite robotImage;
 
-        [SerializeField]
-        [Tooltip("Tutorial card GameObjects for the primary configuration.")]
-        private List<GameObject> tutorialCards;
+        [Header("Main Robot")] [SerializeField] [Tooltip("The main robot variant for this robot metadata.")]
+        private RobotVariant mainRobot;
 
-        [SerializeField]
-        [Tooltip("Tutorial card GameObjects for the alternate configuration.")]
-        private List<GameObject> alternateTutorialCards;
-        
         public bool IsModded { get; set; } = false;
 
-        // Public read-only API (meets IRobotMetadata)
+        // Public read-only metadata API.
         public int TeamNumber => teamNumber;
         public string TeamName => teamName;
-        public GameObject RobotPrefab => robotPrefab;
-        public GameObject RobotPreloadGamePiece => robotPreloadGamePiece;
-        public GameObject MainMenuPrefab => mainMenuPrefab;
-        public bool HasAlternateRobot => hasAlternateRobot;
-        public GameObject AlternateRobotPrefab => alternateRobotPrefab;
-        public GameObject AlternateMainMenuPrefab => alternateMainMenuPrefab;
+        public string RobotName => mainRobot.DisplayName;
+        public GameObject RobotPrefab => mainRobot.RobotPrefab;
+        public GameObject RobotPreloadGamePiece => mainRobot.PreloadGamePiece;
+        public GameObject MainMenuPrefab => mainRobot.MainMenuPrefab;
+        public GameObject SpawnSelectionPrefab => mainRobot.SpawnSelectionPrefab;
+        public abstract IReadOnlyList<RobotVariant> AlternateRobots { get; }
         public Sprite RobotImage => robotImage;
-        public List<GameObject> TutorialCards => tutorialCards;
-        public List<GameObject> AlternateTutorialCards => alternateTutorialCards;
+        public IReadOnlyList<GameObject> TutorialCards => mainRobot.TutorialCards;
+
+        public abstract int GameYear { get; }
+
+        /// <summary>The game this robot belongs to. Override in games that are not FRC.</summary>
+        public virtual GameType GameType => GameType.FRC;
+
+        public RobotVariant GetAlternateVariant(int selectedVariantIndex)
+        {
+            var alternateIndex = selectedVariantIndex - 1;
+            return AlternateRobots != null && alternateIndex >= 0 && alternateIndex < AlternateRobots.Count
+                ? AlternateRobots[alternateIndex]
+                : null;
+        }
+
+        public GameObject GetRobotPrefabForVariant(int selectedVariantIndex)
+        {
+            var variant = GetAlternateVariant(selectedVariantIndex);
+            return variant?.RobotPrefab ?? RobotPrefab;
+        }
+
+        public GameObject GetMainMenuPrefabForVariant(int selectedVariantIndex)
+        {
+            var variant = GetAlternateVariant(selectedVariantIndex);
+            return variant == null ? MainMenuPrefab : variant.MainMenuPrefab ?? variant.RobotPrefab ?? RobotPrefab;
+        }
+
+        public GameObject GetSpawnSelectionPrefabForVariant(int selectedVariantIndex)
+        {
+            var variant = GetAlternateVariant(selectedVariantIndex);
+            return variant == null
+                ? SpawnSelectionPrefab
+                : variant.SpawnSelectionPrefab ?? variant.RobotPrefab ?? RobotPrefab;
+        }
+
+        /// <summary>
+        /// Returns the preload game piece for the selected variant, falling back to the main robot's
+        /// preload when an alternate variant does not define its own.
+        /// </summary>
+        public GameObject GetPreloadGamePieceForVariant(int selectedVariantIndex)
+        {
+            var variant = GetAlternateVariant(selectedVariantIndex);
+            return variant?.PreloadGamePiece ?? RobotPreloadGamePiece;
+        }
+
+        public IReadOnlyList<GameObject> GetTutorialCardsForVariant(int selectedVariantIndex)
+        {
+            return GetAlternateVariant(selectedVariantIndex)?.TutorialCards ?? TutorialCards;
+        }
 
         /// <summary>
         /// Returns a string representation of the robot in the format "TeamNumber - TeamName".
@@ -85,66 +96,93 @@ namespace RobotFramework
         }
 
         /// <summary>
-        /// Generates a hash code for the robot metadata based on team number and team name.
+        /// Generates a GUID string for the robot metadata. Non-FRC games append their game type so robots
+        /// from different games sharing a year never collide. FRC keeps the original seed so existing IDs stay valid.
         /// </summary>
-        public override int GetHashCode()
+        public string GetGuid()
         {
-            return teamNumber + (teamName != null ? teamName.GetHashCode() : 0);
+            var seed = $"{name}|{teamNumber}|{teamName ?? string.Empty}|{GameYear}|{GameType}";
+            return Utils.CreateDeterministicGuid(seed).ToString();
         }
 
         /// <summary>
         /// Editor-only validation to keep values consistent and avoid null references.
         /// Validates required prefabs, warns on missing assets, and ensures alternate settings are consistent.
         /// </summary>
-        private void OnValidate()
+        protected virtual void OnValidate()
         {
-            // Normalize strings
-            if (!string.IsNullOrEmpty(teamName)) teamName = teamName.Trim();
-
             // Clamp team number to non-negative
             if (teamNumber < 0) teamNumber = 0;
 
-            // Ensure lists are non-null
-            if (tutorialCards == null) tutorialCards = new List<GameObject>();
-            if (alternateTutorialCards == null) alternateTutorialCards = new List<GameObject>();
-
             // Validate required prefabs
-            if (robotPrefab == null)
+            if (mainRobot.RobotPrefab == null)
             {
                 Debug.LogWarning($"Robot metadata '{name}' is missing the main RobotPrefab!", this);
             }
 
-            if (mainMenuPrefab == null)
+            if (mainRobot.MainMenuPrefab == null)
             {
                 Debug.LogWarning($"Robot metadata '{name}' is missing the MainMenuPrefab!", this);
             }
 
-            // Validate alternate prefabs consistency
-            if (hasAlternateRobot)
+            if (mainRobot.SpawnSelectionPrefab == null)
             {
-                if (alternateRobotPrefab == null)
+                Debug.LogWarning($"Robot metadata '{name}' is missing the SpawnSelectionPrefab!", this);
+            }
+
+            foreach (var variant in AlternateRobots)
+            {
+                if (variant == null)
                 {
-                    Debug.LogWarning(
-                        $"Robot metadata '{name}' has HasAlternateRobot enabled but AlternateRobotPrefab is null!",
+                    Debug.LogWarning($"Robot metadata '{name}' contains a null alternate variant!", this);
+                    continue;
+                }
+
+                if (variant.RobotPrefab == null)
+                {
+                    Debug.LogWarning($"Robot metadata '{name}' has an alternate variant without a RobotPrefab!", this);
+                }
+
+                if (variant.MainMenuPrefab == null)
+                {
+                    Debug.LogWarning($"Robot metadata '{name}' has an alternate variant without a MainMenuPrefab!",
                         this);
                 }
 
-                if (alternateMainMenuPrefab == null)
+                if (variant.SpawnSelectionPrefab == null)
                 {
                     Debug.LogWarning(
-                        $"Robot metadata '{name}' has HasAlternateRobot enabled but AlternateMainMenuPrefab is null!",
-                        this);
+                        $"Robot metadata '{name}' has an alternate variant without a SpawnSelectionPrefab!", this);
                 }
             }
-            else
-            {
-                // If no alternate variant, clear alternate-only refs
-                if (alternateRobotPrefab != null || alternateMainMenuPrefab != null)
-                {
-                    alternateRobotPrefab = null;
-                    alternateMainMenuPrefab = null;
-                }
-            }
+        }
+
+        [Serializable]
+        public class RobotVariant
+        {
+            [Tooltip("The robot variant name for the alternate robot menu. Leave blank for auto versioning.")]
+            [SerializeField]
+            private string displayName;
+
+            [SerializeField] private GameObject robotPrefab;
+            [SerializeField] private GameObject mainMenuPrefab;
+            [SerializeField] private GameObject spawnSelectionPrefab;
+
+            [Tooltip("The game piece the robot starts with preloaded (optional). Leave blank to use the main robot's.")]
+            [SerializeField]
+            private GameObject preloadGamePiece;
+
+            [SerializeField] private List<GameObject> tutorialCards = new();
+
+            public string DisplayName => displayName;
+            public GameObject RobotPrefab => robotPrefab;
+            public GameObject PreloadGamePiece => preloadGamePiece;
+            public GameObject MainMenuPrefab => mainMenuPrefab;
+            public GameObject SpawnSelectionPrefab => spawnSelectionPrefab;
+
+            public IReadOnlyList<GameObject> TutorialCards => tutorialCards != null
+                ? tutorialCards
+                : Array.Empty<GameObject>();
         }
     }
 }

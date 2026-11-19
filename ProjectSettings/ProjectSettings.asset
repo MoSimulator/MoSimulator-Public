@@ -13,7 +13,7 @@ PlayerSettings:
   useOnDemandResources: 0
   accelerometerFrequency: 60
   companyName: CascadeStudios
-  productName: MoSimulator
+  productName: MoSim
   defaultCursor: {fileID: 0}
   cursorHotspot: {x: 0, y: 0}
   m_SplashScreenBackgroundColor: {r: 0.07809721, g: 0.0803667, b: 0.084905684, a: 1}
@@ -82,7 +82,7 @@ PlayerSettings:
   androidApplicationEntry: 2
   defaultIsNativeResolution: 1
   macRetinaSupport: 1
-  runInBackground: 0
+  runInBackground: 1
   captureSingleScreen: 0
   muteOtherAudioSources: 0
   Prepare IOS For Recording: 0
@@ -95,7 +95,7 @@ PlayerSettings:
   bakeCollisionMeshes: 0
   forceSingleInstance: 0
   useFlipModelSwapchain: 1
-  resizableWindow: 0
+  resizableWindow: 1
   useMacAppStoreValidation: 0
   macAppStoreCategory: public.app-category.games
   gpuSkinning: 1
@@ -139,8 +139,9 @@ PlayerSettings:
   vulkanEnableLateAcquireNextImage: 0
   vulkanEnableCommandBufferRecycling: 1
   loadStoreDebugModeEnabled: 0
-  bundleVersion: 25.3.0
-  preloadedAssets: []
+  bundleVersion: 26.6.0
+  preloadedAssets:
+  - {fileID: 11400000, guid: b8f8c289c4347bf43a0bfa0d88516780, type: 2}
   metroInputSource: 0
   wsaTransparentSwapchain: 0
   m_HolographicPauseOnTrackingLoss: 1
@@ -162,9 +163,9 @@ PlayerSettings:
   androidMaxAspectRatio: 2.1
   androidMinAspectRatio: 1
   applicationIdentifier:
-    Android: com.UnityTechnologies.com.unity.template.urpblank
-    Standalone: com.Unity-Technologies.com.unity.template.urp-blank
-    iPhone: com.Unity-Technologies.com.unity.template.urp-blank
+    Android: com.mosimulator.mosimulator
+    Standalone: com.mosimulator.mosimulator
+    iPhone: com.mosimulator.mosimulator
   buildNumber:
     Bratwurst: 0
     Standalone: 0
@@ -825,23 +826,23 @@ PlayerSettings:
   webGLWebAssemblyBigInt: 0
   webGLCloseOnQuit: 0
   scriptingDefineSymbols:
-    Android: ENABLE_JSON_CATALOG
-    Bratwurst: 
-    EmbeddedLinux: ENABLE_JSON_CATALOG
-    GameCoreScarlett: 
-    GameCoreXboxOne: 
-    LinuxHeadlessSimulation: ENABLE_JSON_CATALOG
-    Nintendo Switch: ENABLE_JSON_CATALOG
-    PS4: ENABLE_JSON_CATALOG
-    PS5: 
-    QNX: ENABLE_JSON_CATALOG
+    Android: ENABLE_JSON_CATALOG;DOTWEEN
+    Bratwurst: DOTWEEN
+    EmbeddedLinux: ENABLE_JSON_CATALOG;DOTWEEN
+    GameCoreScarlett: DOTWEEN
+    GameCoreXboxOne: DOTWEEN
+    LinuxHeadlessSimulation: ENABLE_JSON_CATALOG;DOTWEEN
+    Nintendo Switch: ENABLE_JSON_CATALOG;DOTWEEN
+    PS4: ENABLE_JSON_CATALOG;DOTWEEN
+    PS5: DOTWEEN
+    QNX: ENABLE_JSON_CATALOG;DOTWEEN
     Server: ENABLE_JSON_CATALOG
-    Standalone: ENABLE_JSON_CATALOG;ENABLE_INPUT_SYSTEM
-    WebGL: ENABLE_JSON_CATALOG
-    Windows Store Apps: ENABLE_JSON_CATALOG
-    XboxOne: ENABLE_JSON_CATALOG
-    iPhone: ENABLE_JSON_CATALOG
-    tvOS: ENABLE_JSON_CATALOG
+    Standalone: ENABLE_JSON_CATALOG;DOTWEEN;ENABLE_INPUT_SYSTEM;STEAMWORKS_NET
+    WebGL: ENABLE_JSON_CATALOG;DOTWEEN
+    Windows Store Apps: ENABLE_JSON_CATALOG;DOTWEEN
+    XboxOne: ENABLE_JSON_CATALOG;DOTWEEN
+    iPhone: ENABLE_JSON_CATALOG;DOTWEEN
+    tvOS: ENABLE_JSON_CATALOG;DOTWEEN
   additionalCompilerArguments: {}
   platformArchitecture: {}
   scriptingBackend:

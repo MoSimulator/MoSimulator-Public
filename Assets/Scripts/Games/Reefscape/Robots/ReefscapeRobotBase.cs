@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using Games.Reefscape.Enums;
 using Games.Reefscape.FieldScripts;
 using Games.Reefscape.GamePieceSystem;
@@ -7,13 +8,15 @@ using MoSimCore.Enums;
 using RobotFramework;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using System.Collections.Generic;
+using Games.Reefscape.Scoring.Scorers;
 
 namespace Games.Reefscape.Robots
 {
     public class ReefscapeRobotBase : RobotBase
     {
         [field: NonSerialized]
-        protected new ReefscapeRobotGamePieceController RobotGamePieceController { get; private set; }
+        protected ReefscapeRobotGamePieceController RobotGamePieceController { get; private set; }
 
         public InputAction L4Action { get; private set; }
         public InputAction L3Action { get; private set; }
@@ -28,27 +31,51 @@ namespace Games.Reefscape.Robots
         public InputAction IntakeModeToggleAction { get; private set; }
         public InputAction RobotSpecialAction { get; private set; }
 
-        [field: SerializeField] public ReefscapeSetpoints CurrentSetpoint { get; private set; }
-        protected ReefscapeSetpoints LastSetpoint { get; private set; }
+        /// <summary>Gets the stow/home input action.</summary>
+        public InputAction StowAction { get; private set; }
+
+        /// <summary>Gets the intake input action.</summary>
+        public InputAction IntakeAction { get; private set; }
+
+        /// <summary>Gets the outtake/place input action.</summary>
+        public InputAction OuttakeAction { get; private set; }
+
+        public ReefscapeSetpoints CurrentSetpoint { get; private set; }
+        public ReefscapeSetpoints LastSetpoint { get; private set; }
+
+        protected ReefscapeSetpoints FixedLastSetpoint { get; private set; }
+
+        protected ReefscapeSetpoints FixedCurrentSetpoint { get; private set; }
         public bool IsIntaking => IntakeAction.IsPressed();
 
         public ReefscapeRobotMode CurrentRobotMode { get; private set; }
         public ReefscapeIntakeMode CurrentIntakeMode { get; private set; }
-        [field: SerializeField] public CoralStationMode CurrentCoralStationMode { get; private set; }
 
+        /// <summary>Mode the driver has toggled to; applied to CurrentIntakeMode once no coral is held.</summary>
+        public ReefscapeIntakeMode RequestedIntakeMode { get; private set; }
+        [field: SerializeField]public CoralStationMode CurrentCoralStationMode { get; set; }
         [SerializeField] protected bool superCycler = false;
 
         private GameObject _targetReef;
-        protected bool FacingReef;
-
+        private Reef _refReef;
+        public bool FacingReef { get; private set; }
+        public bool FacingBarge { get; private set; }
+        
+        [HideInInspector] public Collider bumperCollider;
         private bool _hasCoral = true;
         private bool _hasAlgae;
         protected int HasCoralTrigger { get; set; }
 
+        private bool _disableStateMachine;
+
         protected override void Awake()
         {
             base.Awake();
-
+            bumperCollider = GetComponent<BoxCollider>();
+            if (GetComponent<ReefscapePushPenaltyScorer>() == null)
+            {
+                gameObject.AddComponent<ReefscapePushPenaltyScorer>();
+            }
             RobotGamePieceController = GetComponent<ReefscapeRobotGamePieceController>();
             if (RobotGamePieceController == null)
             {
@@ -56,6 +83,17 @@ namespace Games.Reefscape.Robots
             }
 
             SetupInputActions();
+            StartCoroutine(FixedUpdateScheduler());
+        }
+
+        private IEnumerator FixedUpdateScheduler()
+        {
+            while (true)
+            {
+                FixedCurrentSetpoint = CurrentSetpoint;
+                FixedLastSetpoint = LastSetpoint;
+                yield return new WaitForFixedUpdate();
+            }
         }
 
         protected override void Start()
@@ -79,6 +117,10 @@ namespace Games.Reefscape.Robots
             }
 
             _targetReef = Alliance == Alliance.Blue ? GameObject.Find("BlueReef") : GameObject.Find("RedReef");
+            _refReef = _targetReef.GetComponent<Reef>();
+
+            _disableStateMachine = false;
+
         }
 
         private void SetupInputActions()
@@ -95,11 +137,25 @@ namespace Games.Reefscape.Robots
             RobotModeToggleAction = InputActionMap.FindAction("RobotModeToggle");
             IntakeModeToggleAction = InputActionMap.FindAction("IntakeModeToggle");
             RobotSpecialAction = InputActionMap.FindAction("RobotSpecial");
+
+            StowAction = InputActionMap.FindAction("Stow");
+            OuttakeAction = InputActionMap.FindAction("Place");
+            IntakeAction = InputActionMap.FindAction("Intake");
+        }
+
+        protected override void DelayedStart()
+        {
+            base.DelayedStart();
+            SetupInputActions();
         }
 
         protected override void Update()
         {
             base.Update();
+
+            HandleRumble();
+            
+            if (_disableStateMachine) return;
 
             if (RobotModeToggleAction.triggered && !RightStickModifierAction.IsPressed())
             {
@@ -111,16 +167,21 @@ namespace Games.Reefscape.Robots
                 };
             }
 
-            if (IntakeModeToggleAction.triggered &&
-                RobotGamePieceController.GetPieceByName("Coral").currentStateNum == 0 &&
-                !RightStickModifierAction.IsPressed())
+            if (IntakeModeToggleAction.triggered && !RightStickModifierAction.IsPressed())
             {
-                CurrentIntakeMode = CurrentIntakeMode switch
+                RequestedIntakeMode = RequestedIntakeMode switch
                 {
                     ReefscapeIntakeMode.L1 => ReefscapeIntakeMode.Normal,
                     ReefscapeIntakeMode.Normal => ReefscapeIntakeMode.L1,
                     _ => ReefscapeIntakeMode.Normal
                 };
+            }
+
+            // The requested mode only takes effect while empty, so a held piece
+            // keeps the handling it was intaken with until it leaves the robot.
+            if (RobotGamePieceController.GetPieceByName("Coral").currentStateNum == 0)
+            {
+                CurrentIntakeMode = RequestedIntakeMode;
             }
 
             if (BaseGameManager.Instance.RobotState == RobotState.Disabled)
@@ -144,8 +205,13 @@ namespace Games.Reefscape.Robots
             }
             else if (L1Action.triggered)
             {
-                if (RobotGamePieceController.GetPieceByName("Coral").currentStateNum == 0 &&
-                    RobotGamePieceController.GetPieceByName("Algae").currentStateNum == 0)
+                CheckFacingReef();
+                if (CurrentSetpoint is ReefscapeSetpoints.L1 or ReefscapeSetpoints.Processor or ReefscapeSetpoints.Stack)
+                {
+                    CurrentSetpoint = ReefscapeSetpoints.Stow;
+                }
+                else if (RobotGamePieceController.GetPieceByName("Coral").currentStateNum == 0 &&
+                           RobotGamePieceController.GetPieceByName("Algae").currentStateNum == 0)
                 {
                     if (CurrentSetpoint == ReefscapeSetpoints.Stow && CurrentRobotMode == ReefscapeRobotMode.Algae)
                     {
@@ -195,6 +261,7 @@ namespace Games.Reefscape.Robots
             else if (L4Action.triggered)
             {
                 CheckFacingReef();
+                CheckFacingBarge();
                 if (CurrentSetpoint is ReefscapeSetpoints.L4 or ReefscapeSetpoints.Barge)
                 {
                     CurrentSetpoint = ReefscapeSetpoints.Stow;
@@ -244,8 +311,11 @@ namespace Games.Reefscape.Robots
                 LastSetpoint = CurrentSetpoint;
                 SetState(CurrentSetpoint);
             }
-            
-            HandleRumble();
+        }
+
+        public void DisableStateMachine()
+        {
+            _disableStateMachine = true;
         }
 
         protected void SetState(ReefscapeSetpoints setpoint)
@@ -259,7 +329,13 @@ namespace Games.Reefscape.Robots
             CurrentRobotMode = mode;
         }
 
-        private void CheckFacingReef()
+        protected void SetIntakeMode(ReefscapeIntakeMode mode)
+        {
+            RequestedIntakeMode = mode;
+            CurrentIntakeMode = mode;
+        }
+
+        public void CheckFacingReef()
         {
             var toReefVector = (_targetReef.transform.position - transform.position).normalized;
             var robotForwardVector = transform.forward.normalized;
@@ -267,9 +343,47 @@ namespace Games.Reefscape.Robots
             FacingReef = angle > 0.0f;
         }
 
+        public void CheckFacingBarge()
+        {
+            var toZAxisXY = new Vector3(-transform.position.x, -transform.position.y, 0f).normalized;
+            var forwardXY = new Vector3(transform.forward.x, transform.forward.y, 0f).normalized;
+            var dot = Vector3.Dot(forwardXY, toZAxisXY);
+            FacingBarge = dot > 0.0f;
+        }
+
+        /// <summary>
+        /// Returns the distance to the closest point on the barge in inches
+        /// </summary>
+        /// <returns></returns>
+        public float GetDistanceToBarge()
+        {
+            Vector3 currentPose = transform.position;
+
+            // Get the spawner's local axis in world space
+            Vector3 axisDirection = transform.forward;
+
+            // Project the vector from spawner to target onto the axis
+            float projectionLength = Vector3.Dot(-currentPose, axisDirection);
+
+            Vector3 closestPoint = currentPose + axisDirection * projectionLength;
+
+            // Return the point along the spawner's axis within the bounds
+            return Vector3.Distance(closestPoint, currentPose) * 39.37008f;
+        }
+
+        public Reef GetReef()
+        {
+            return _refReef;
+        }
+
         public bool GetFacingReef()
         {
             return FacingReef;
+        }
+
+        public bool GetFacingBarge()
+        {
+            return FacingBarge;
         }
 
         private void HandleRumble()
@@ -302,6 +416,16 @@ namespace Games.Reefscape.Robots
                     _hasAlgae = false;
                     break;
             }
+        }
+
+
+        /// <summary>
+        /// Returns if at setpoint. Must be overiden in your robot script. Used by auto align advanced functionality
+        /// </summary>
+        /// <returns></returns>
+        public virtual bool AtSetpoint()
+        {
+            return false;
         }
     }
 }

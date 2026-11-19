@@ -6,9 +6,9 @@ namespace Games.Reefscape.Scoring.Scorers
 {
     public class ReefscapeTestScorer : MonoBehaviour, IScorer
     {
-        [SerializeField] private int scoreValue = 10;
+        [SerializeField] private MoSimLib.SecureFloat scoreValue = 10;
         
-        public int ScoreValue => scoreValue;
+        public MoSimLib.SecureFloat ScoreValue => scoreValue;
         
         [field: SerializeField] public Alliance Alliance { get; } = Alliance.Blue;
         

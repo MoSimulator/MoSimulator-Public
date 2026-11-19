@@ -4,18 +4,26 @@ namespace Games.Reefscape.Scoring
 {
     public class ReefscapeScoreData : IScoreData
     {
-        public int CoralPoints { get; set; }
-        public int TroughPoints { get; set; }
-        public int NetPoints { get; set; }
-        public int ProcessorPoints { get; set; }
-        public int ClimbPoints { get; set; }
-        public int ParkPoints { get; set; }
-        public int LeavePoints { get; set; }
+        public MoSimLib.SecureFloat CoralPoints { get; set; }
+        public MoSimLib.SecureFloat TroughPoints { get; set; }
+        public MoSimLib.SecureFloat NetPoints { get; set; }
+        public MoSimLib.SecureFloat ProcessorPoints { get; set; }
+        public MoSimLib.SecureFloat ClimbPoints { get; set; }
+        public MoSimLib.SecureFloat ParkPoints { get; set; }
+        public MoSimLib.SecureFloat LeavePoints { get; set; }
         
-        public int CoralScored { get; set; }
-        public int AlgaeScored { get; set; }
+        public MoSimLib.SecureFloat CoralScored { get; set; }
+        public MoSimLib.SecureFloat AlgaeScored { get; set; }
         
-        public int TotalPoints => CoralPoints + TroughPoints + NetPoints + ProcessorPoints + ClimbPoints + ParkPoints + LeavePoints;
+        public MoSimLib.SecureFloat PenaltyEarned { get; set; }
+        
+        public MoSimLib.SecureFloat SelfPenaltyEarned { get; set; }
+        
+        public MoSimLib.SecureFloat TotalPoints => CoralPoints + TroughPoints + NetPoints + ProcessorPoints + ClimbPoints + ParkPoints + LeavePoints;
+        
+        public MoSimLib.SecureFloat PenaltyPoints => PenaltyEarned;
+        
+        public MoSimLib.SecureFloat SelfPenaltyPoints => SelfPenaltyEarned;
         
         public void Reset()
         {
@@ -28,6 +36,8 @@ namespace Games.Reefscape.Scoring
             LeavePoints = 0;
             CoralScored = 0;
             AlgaeScored = 0;
+            PenaltyEarned = 0;
+            SelfPenaltyEarned = 0;
         }
     }
 }

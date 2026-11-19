@@ -1,8 +1,9 @@
 ﻿using System.Linq;
-using Games.Reefscape.Robots;
+using MoSimCore.BaseClasses.GameManagement;
 using MoSimCore.Enums;
 using MoSimCore.Interfaces;
 using MoSimLib;
+using RobotFramework;
 using RobotFramework.Controllers.Drivetrain;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -12,7 +13,7 @@ namespace Games.Reefscape.Scoring.Scorers
     public class ClimbScorer : MonoBehaviour, IScorer
     {
         public Alliance Alliance { get; private set; }
-        private ReefscapeRobotBase _robotBase;
+        private RobotBase _robotBase;
         private DriveController _driveController;
 
         [Header("Cage Detection Triggers")] 
@@ -38,7 +39,7 @@ namespace Games.Reefscape.Scoring.Scorers
         private float _autoClimbTimer = 0f;
         private const float AutoClimbThreshold = 0.1f;
 
-        private float finalScoreAdded;
+        private SecureFloat finalScoreAdded;
 
         private void Start()
         {
@@ -61,7 +62,7 @@ namespace Games.Reefscape.Scoring.Scorers
                 enabled = false;
             }
 
-            _robotBase = GetComponentInParent<ReefscapeRobotBase>();
+            _robotBase = GetComponentInParent<RobotBase>();
             if (_robotBase == null)
             {
                 Debug.LogError("ClimbScorer: ReefscapeRobotBase component not found in parent.");
@@ -142,7 +143,9 @@ namespace Games.Reefscape.Scoring.Scorers
         {
             if (scoreData is ReefscapeScoreData reefscapeData)
             {
-                if (gameState == GameState.Endgame)
+                // Let robots settle during the post-match disabled period before freezing endgame points.
+                if (gameState == GameState.Endgame ||
+                    (gameState == GameState.End && BaseGameManager.Instance.RobotState == RobotState.Disabled))
                 {
                     _inBargeZone = _bargeZoneBounds.OverlapBox()
                         .Any(overlappingCollider =>
@@ -170,7 +173,7 @@ namespace Games.Reefscape.Scoring.Scorers
                 } 
                 else if (gameState == GameState.End)
                 {
-                    // Carry over the logic from the final endgame state to the final scoreboard
+                    // Preserve the last score from the disabled period after robots are re-enabled.
                     if (Mathf.Approximately(finalScoreAdded, 2))
                     {
                         reefscapeData.ParkPoints += 2;

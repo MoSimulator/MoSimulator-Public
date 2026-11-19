@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 713155721937481dbf0332a6dcf52567, type: 3}
+  m_Name: OfficialReefscape
+  m_EditorClassIdentifier: 
+  modpackName: Reefscape Official
+  modpackVersion: 1.0.0
+  authorName: Cascade Studios
+  description: 
+  thumbnail: {fileID: 0}
+  robots:
+  - {fileID: 11400000, guid: b084530888f7acc4284455151af80643, type: 2}
+  - {fileID: 11400000, guid: d9286892e208bc74d9dfd8254febd42d, type: 2}

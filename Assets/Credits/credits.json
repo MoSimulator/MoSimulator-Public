@@ -1,0 +1,193 @@
+{
+  "sections": [
+    {
+      "layout": "list",
+      "header": "Cascade Studios",
+      "people": [
+        {
+          "name": "Evan Kruger",
+          "title": "Director of Operations"
+        },
+        {
+          "name": "Mason Morgan",
+          "title": "Director of Simulation"
+        },
+	{
+          "name": "Oliver Weller",
+          "title": "Director of Gameplay"
+        },
+	{
+          "name": "Trent McCarthy",
+          "title": "Director of WebOps"
+        },
+	{
+          "name": "Alon Rabinowitz",
+          "title": "MoSim Developer"
+        },
+	{
+          "name": "Aaron Sit",
+          "title": "Director of Media"
+        },
+	{
+          "name": "Matthew Miners",
+          "title": "Modeling Advisor"
+        }
+      ]
+    },
+    {
+      "layout": "grid",
+      "header": "Additional Contributors",
+      "people": [
+        {
+          "name": "William A."
+        },
+        {
+          "name": "Bryce B."
+        },
+        {
+          "name": "Evan D."
+        },
+	{
+          "name": "Joshua DeVries"
+        },
+        {
+          "name": "Ryan H."
+        },
+	{
+          "name": "Shayan H."
+        },
+	{
+          "name": "Hecker"
+        },
+	{
+	  "name": "Zachary K."
+	},
+	{
+          "name": "Ari L."
+        },
+	{
+          "name": "Rowan McAlpin"
+        },
+	{
+          "name": "Vedant P."
+        },
+	{
+          "name": "Bryce Roethel"
+        },
+	{
+          "name": "Jake S."
+        },
+	{
+          "name": "Soham S."
+        },
+	{
+          "name": "Ethan W."
+        },
+	{
+          "name": "Sebastian W."
+        }
+      ]
+    },
+    {
+      "layout": "list",
+      "header": "Attribution",
+      "people": [
+	{
+          "name": "Alain S.",
+          "title": "2026 WCP CC Audio"
+        },
+	{
+          "name": "Eric J.",
+          "title": "1323 Recad"
+        },
+	{
+          "name": "Freepik",
+          "title": "Link Icons"
+        }
+      ]
+    },
+    {
+      "layout": "list",
+      "header": "Community and Partners",
+      "people": [
+        {
+	  "name": "FRCtees",
+	  "title": "Merch Partner"
+	},
+	{
+          "name": "West Coast Products",
+          "title": "Website Sponsor"
+        },
+	{
+          "name": "Charlie Getz",
+          "title": "MoSim Discord Owner"
+        },
+        {
+          "name": "xFC Robotics Competition",
+          "title": "Community Events Partner"
+        }
+      ]
+    },
+    {
+      "layout": "grid",
+      "header": "FRC Teams",
+      "people": [
+        {
+          "name": "118 Robonauts"
+        },
+        {
+          "name": "190 Gompei and the HERD"
+        },
+        {
+          "name": "422 The Mech Tech Dragons"
+        },
+	{
+          "name": "1114 Simbotics"
+        },
+        {
+          "name": "1323 MadTown Robotics"
+        },
+	{
+          "name": "1678 Citrus Circuits"
+        },
+	{
+          "name": "1690 Orbit"
+        },
+	{
+          "name": "1706 Ratchet Rockers"
+        },
+	{
+          "name": "2910 Jack in the Bot"
+        },
+	{
+	  "name": "3847 Spectrum"
+	},
+	{
+          "name": "4414 HighTide"
+        },
+	{
+	  "name": "6366 RAM Rodz Robotics"
+	},
+	{
+	  "name": "8515 Photon"
+	},
+	{
+          "name": "9483 Overcharge"
+        },
+	{
+          "name": "9496 LYNK"
+        }
+      ]
+    },
+    {
+      "layout": "list",
+      "header": "Original MoSimulator",
+      "people": [
+        {
+          "name": "Marco from Team 4089",
+          "title": "Creator"
+        }
+      ]
+    }
+  ]
+}
