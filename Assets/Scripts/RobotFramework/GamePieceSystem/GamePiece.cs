@@ -16,7 +16,14 @@ namespace RobotFramework.GamePieceSystem
         
         public bool isScored;
         
-        public void Initialize(TData data, GameObject gameObject)
+        public MoSimLib.MoSimResult<MoSimLib.Void> Initialize(TData data, GameObject gameObject)
+        {
+            var version = MoSimLib.MoSim.ActiveVersion;
+            InitializeV1(data, gameObject);
+            return MoSimLib.MoSimResult<MoSimLib.Void>.Success(new MoSimLib.Void());
+        }
+
+        private void InitializeV1(TData data, GameObject gameObject)
         {
             GamePieceData = data;
             this.gameObject = gameObject;

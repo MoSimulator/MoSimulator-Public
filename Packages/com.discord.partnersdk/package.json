@@ -1,0 +1,12 @@
+{
+    "name": "com.discord.partnersdk",
+    "displayName": "Discord Social SDK",
+    "version": "1.9.15780",
+    "description": "The Discord Social SDK provides a way for games to deeply integrate with Discord.",
+    "unity": "2021.3",
+    "documentationUrl": "https://discord.com/developers/docs/slayer-sdk/index.html",
+    "author": {
+        "name": "Discord",
+        "email": "social-layer-dps-eng@discordapp.com"
+    }
+}

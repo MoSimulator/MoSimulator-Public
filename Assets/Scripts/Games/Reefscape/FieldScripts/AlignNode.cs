@@ -6,5 +6,6 @@ namespace Games.Reefscape.FieldScripts
     {
         public GameObject LeftNode;
         public GameObject RightNode;
+        public bool LowAlgae;
     }
 }

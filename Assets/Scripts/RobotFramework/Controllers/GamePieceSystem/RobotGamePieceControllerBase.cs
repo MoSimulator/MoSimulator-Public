@@ -5,6 +5,6 @@ namespace RobotFramework.Controllers.GamePieceSystem
 {
     public abstract class RobotGamePieceControllerBase : MonoBehaviour
     {
-        public abstract void RunCoroutine(IEnumerator routine);
+        public abstract MoSimLib.MoSimResult<MoSimLib.Void> RunCoroutine(IEnumerator routine);
     }
 }

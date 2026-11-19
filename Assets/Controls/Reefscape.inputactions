@@ -83,7 +83,7 @@
                     "id": "aeb6b3ac-dfc4-44bb-8cd8-59b158b33268",
                     "expectedControlType": "Button",
                     "processors": "",
-                    "interactions": "Press",
+                    "interactions": "",
                     "initialStateCheck": false
                 },
                 {
@@ -184,6 +184,33 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "DriveSpeed1",
+                    "type": "Button",
+                    "id": "6d5f6ded-fd91-441a-bafb-815f592af230",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "DriveSpeed2",
+                    "type": "Button",
+                    "id": "cb9e9595-2922-40f7-ae9c-571dbab36690",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "DriveSpeed3",
+                    "type": "Button",
+                    "id": "272f6a01-ba06-4a0f-a131-7876d326cce9",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -193,7 +220,7 @@
                     "path": "<Gamepad>/leftStick",
                     "interactions": "",
                     "processors": "",
-                    "groups": "Robot 1;Robot 2",
+                    "groups": "Robot 1",
                     "action": "Translate",
                     "isComposite": false,
                     "isPartOfComposite": false
@@ -265,6 +292,61 @@
                     "isPartOfComposite": false
                 },
                 {
+                    "name": "WASD",
+                    "id": "1b63f2e4-a7da-446d-bbe2-61e3a3fef3f7",
+                    "path": "2DVector",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Translate",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "up",
+                    "id": "3ad9fe53-4198-4e8a-a435-a0ae12a8ba16",
+                    "path": "<Keyboard>/w",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Robot 2",
+                    "action": "Translate",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "down",
+                    "id": "387b8764-550a-44eb-be74-3e9810b85029",
+                    "path": "<Keyboard>/s",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Robot 2",
+                    "action": "Translate",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "left",
+                    "id": "a8369b0f-c335-4375-b229-bdc23df901ff",
+                    "path": "<Keyboard>/a",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Robot 2",
+                    "action": "Translate",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "right",
+                    "id": "6d13d467-de89-48a4-9d89-010c2b8da851",
+                    "path": "<Keyboard>/d",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Robot 2",
+                    "action": "Translate",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
                     "name": "",
                     "id": "04e6ba44-eba5-4d62-bd14-6394b6e200ee",
                     "path": "<Gamepad>/rightStick/x",
@@ -320,6 +402,39 @@
                     "isPartOfComposite": false
                 },
                 {
+                    "name": "J/L",
+                    "id": "c72dce65-945c-40f8-b85f-093893dca209",
+                    "path": "1DAxis",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Rotate",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "negative",
+                    "id": "3e3c701e-a750-4ca9-9794-6f80e312fb32",
+                    "path": "<Keyboard>/l",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Robot 2",
+                    "action": "Rotate",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "positive",
+                    "id": "99106fe7-4663-49d7-b434-83f9d027fbf0",
+                    "path": "<Keyboard>/j",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Robot 2",
+                    "action": "Rotate",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
                     "name": "",
                     "id": "bfdf1449-fe12-4662-97a4-1c3f1d433e99",
                     "path": "<Gamepad>/buttonNorth",
@@ -338,39 +453,6 @@
                     "processors": "",
                     "groups": "Robot 1",
                     "action": "L4",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "e038b619-5cd2-41ae-aa67-92c792d2a091",
-                    "path": "<Gamepad>/dpad/down",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "Robot 1",
-                    "action": "Stow",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "4384000d-127e-440a-8205-871ca4c65daa",
-                    "path": "<Keyboard>/z",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "Robot 1",
-                    "action": "Stow",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "5b1d6725-88a3-43fd-88d9-43edbe9f2bc1",
-                    "path": "<Gamepad>/dpad/down",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "Robot 2",
-                    "action": "Stow",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -607,6 +689,17 @@
                 },
                 {
                     "name": "",
+                    "id": "481e36c3-3bc9-4aa9-83ee-07a3465cfb46",
+                    "path": "<Keyboard>/c",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Robot 2",
+                    "action": "Climb",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "ddc3737b-f21a-4733-8356-84d64e5eb543",
                     "path": "<Gamepad>/rightStickPress",
                     "interactions": "",
@@ -662,6 +755,17 @@
                 },
                 {
                     "name": "",
+                    "id": "1d182285-0d8d-4ecd-927a-a97d654c8277",
+                    "path": "<Keyboard>/quote",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Robot 2",
+                    "action": "IntakeModeToggle",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "76a01ae1-42af-4589-9bce-17b219a6e348",
                     "path": "<Gamepad>/dpad/right",
                     "interactions": "",
@@ -695,8 +799,30 @@
                 },
                 {
                     "name": "",
+                    "id": "10a4e7dd-b779-44a6-9b09-71e15a89eed2",
+                    "path": "<Keyboard>/v",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Robot 2",
+                    "action": "RobotSpecial",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "e6166ce7-5ea5-4c8d-b56c-0e8c0c817cec",
                     "path": "<Gamepad>/leftShoulder",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Robot 2",
+                    "action": "AutoAlignLeft",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "694cff9a-f19d-46b2-8f02-aeb2649b5864",
+                    "path": "<Keyboard>/q",
                     "interactions": "",
                     "processors": "",
                     "groups": "Robot 2",
@@ -717,8 +843,30 @@
                 },
                 {
                     "name": "",
+                    "id": "02dfab27-e855-433c-b91f-b358fbfb8f23",
+                    "path": "<Keyboard>/e",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Robot 2",
+                    "action": "AutoAlignRight",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "d84c2133-6404-4353-abb7-754cc50a630d",
                     "path": "<Gamepad>/leftTrigger",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Robot 2",
+                    "action": "Intake",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "0e3ee430-d686-4a14-bce5-e142d3ca4532",
+                    "path": "<Keyboard>/shift",
                     "interactions": "",
                     "processors": "",
                     "groups": "Robot 2",
@@ -739,8 +887,30 @@
                 },
                 {
                     "name": "",
+                    "id": "70705514-1dde-4628-a9e4-b2432ace45ad",
+                    "path": "<Keyboard>/k",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Robot 2",
+                    "action": "Place",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "5996fba1-21a0-42c4-b304-7169842f3dbf",
                     "path": "<Gamepad>/buttonNorth",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Robot 2",
+                    "action": "L4",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "072999b8-d1f4-40ea-b68a-7f60db491456",
+                    "path": "<Keyboard>/p",
                     "interactions": "",
                     "processors": "",
                     "groups": "Robot 2",
@@ -761,8 +931,30 @@
                 },
                 {
                     "name": "",
+                    "id": "1fa48abe-d15b-47d3-86c9-af4e7e6cac9d",
+                    "path": "<Keyboard>/o",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Robot 2",
+                    "action": "L3",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "d9500aff-1ce8-40a8-94f1-d41e74c0a452",
                     "path": "<Gamepad>/buttonEast",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Robot 2",
+                    "action": "L2",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "c493622f-a80b-4dc0-9afb-bd5f293572ec",
+                    "path": "<Keyboard>/i",
                     "interactions": "",
                     "processors": "",
                     "groups": "Robot 2",
@@ -783,8 +975,30 @@
                 },
                 {
                     "name": "",
+                    "id": "213720de-236a-4ea9-8c58-01dbc6838c1a",
+                    "path": "<Keyboard>/u",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Robot 2",
+                    "action": "L1",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "7b2561b3-c1fe-490b-bc52-9ef80fa66a65",
                     "path": "<Gamepad>/start",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Robot 2",
+                    "action": "Restart",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "da97bbae-9bcc-430d-9248-326c7123399a",
+                    "path": "<Keyboard>/r",
                     "interactions": "",
                     "processors": "",
                     "groups": "Robot 2",
@@ -805,8 +1019,30 @@
                 },
                 {
                     "name": "",
+                    "id": "a55370c0-4195-4754-a9bd-6913eae01fd6",
+                    "path": "<Keyboard>/escape",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Robot 2",
+                    "action": "Pause",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "4ace6b05-1571-410f-aaea-d6279edca429",
                     "path": "<Gamepad>/rightStickPress",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Robot 2",
+                    "action": "SwapCamera",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b5217a94-5786-47cf-a549-f8b761650db9",
+                    "path": "<Keyboard>/space",
                     "interactions": "",
                     "processors": "",
                     "groups": "Robot 2",
@@ -840,6 +1076,17 @@
                     "name": "",
                     "id": "2b95f161-0e0f-48e1-850c-c88527c62355",
                     "path": "<Gamepad>/dpad/up",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Robot 2",
+                    "action": "RobotModeToggle",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "62d1dded-e778-479a-aab7-23b52de44bc3",
+                    "path": "<Keyboard>/semicolon",
                     "interactions": "",
                     "processors": "",
                     "groups": "Robot 2",
@@ -903,26 +1150,125 @@
                     "isPartOfComposite": true
                 },
                 {
-                    "name": "",
-                    "id": "0cf3dc6a-bd05-46ca-80f1-47e81b367801",
+                    "name": "CameraMovement",
+                    "id": "52a9b432-5866-43cc-9f14-0f0f7a910462",
+                    "path": "2DVector",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "DriverStationMovement",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "up",
+                    "id": "fb5f21bb-52dc-4b96-8b4d-aaa92edd7fc2",
+                    "path": "<Keyboard>/upArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Robot 2",
+                    "action": "DriverStationMovement",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "down",
+                    "id": "7069fec8-3ebb-487c-94f0-807d32679f0f",
+                    "path": "<Keyboard>/downArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Robot 2",
+                    "action": "DriverStationMovement",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "left",
+                    "id": "8034957d-a459-4865-a41c-a52e51503b9f",
+                    "path": "<Keyboard>/leftArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Robot 2",
+                    "action": "DriverStationMovement",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "right",
+                    "id": "443f4060-8715-4688-998e-6b2b98195c0c",
+                    "path": "<Keyboard>/rightArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Robot 2",
+                    "action": "DriverStationMovement",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "CameraMovementController",
+                    "id": "3c1b481b-aadb-4bab-8aa7-fe0e1a1ae637",
+                    "path": "OneModifier",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "DriverStationMovement",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "modifier",
+                    "id": "7654631f-7f80-43c2-8515-bcc852592bc7",
+                    "path": "<Gamepad>/rightStickPress",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Robot 1",
+                    "action": "DriverStationMovement",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "binding",
+                    "id": "dd54d689-73ba-4700-ab77-81e381c17665",
                     "path": "<Gamepad>/dpad",
                     "interactions": "",
                     "processors": "",
                     "groups": "Robot 1",
                     "action": "DriverStationMovement",
                     "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "CameraMovementController",
+                    "id": "7ca95db2-b9f5-41e3-bb79-3775b0e71274",
+                    "path": "OneModifier",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "DriverStationMovement",
+                    "isComposite": true,
                     "isPartOfComposite": false
                 },
                 {
-                    "name": "",
-                    "id": "0878efee-fae1-4439-9efc-623037440c5d",
+                    "name": "modifier",
+                    "id": "d8f7f747-6e94-4e59-b5d3-f7d58d079c24",
+                    "path": "<Gamepad>/rightStickPress",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Robot 2",
+                    "action": "DriverStationMovement",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "binding",
+                    "id": "acb494c7-9096-4e2e-8111-3223d9ca696e",
                     "path": "<Gamepad>/dpad",
                     "interactions": "",
                     "processors": "",
                     "groups": "Robot 2",
                     "action": "DriverStationMovement",
                     "isComposite": false,
-                    "isPartOfComposite": false
+                    "isPartOfComposite": true
                 },
                 {
                     "name": "",
@@ -943,6 +1289,116 @@
                     "processors": "",
                     "groups": "Robot 2",
                     "action": "RightStickModifier",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "e038b619-5cd2-41ae-aa67-92c792d2a091",
+                    "path": "<Gamepad>/dpad/down",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Robot 1",
+                    "action": "Stow",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "4384000d-127e-440a-8205-871ca4c65daa",
+                    "path": "<Keyboard>/z",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Robot 1",
+                    "action": "Stow",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "5b1d6725-88a3-43fd-88d9-43edbe9f2bc1",
+                    "path": "<Gamepad>/dpad/down",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Robot 2",
+                    "action": "Stow",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "5012722c-2af6-42db-8587-31ca63c51564",
+                    "path": "<Keyboard>/z",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Robot 2",
+                    "action": "Stow",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "cb479af2-4763-4caa-ac3f-5299c4f8a5a7",
+                    "path": "<Keyboard>/1",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Robot 1",
+                    "action": "DriveSpeed1",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "1b78e64a-3526-4ddb-8f6a-211b56f84948",
+                    "path": "<Keyboard>/1",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Robot 2",
+                    "action": "DriveSpeed1",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "fa1da9ef-4aea-4c07-8ae6-610b71baac4a",
+                    "path": "<Keyboard>/2",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Robot 1",
+                    "action": "DriveSpeed2",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "14cb9113-1a0c-473c-9c5a-0b346307151f",
+                    "path": "<Keyboard>/2",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Robot 2",
+                    "action": "DriveSpeed2",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "7993e1af-3eff-4a07-b698-f48754b09a3c",
+                    "path": "<Keyboard>/3",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Robot 1",
+                    "action": "DriveSpeed3",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "98124589-fc5f-4052-8eb2-b47d5aae2c85",
+                    "path": "<Keyboard>/3",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Robot 2",
+                    "action": "DriveSpeed3",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
@@ -973,6 +1429,11 @@
                 {
                     "devicePath": "<Gamepad>",
                     "isOptional": false,
+                    "isOR": false
+                },
+                {
+                    "devicePath": "<Keyboard>",
+                    "isOptional": true,
                     "isOR": false
                 }
             ]

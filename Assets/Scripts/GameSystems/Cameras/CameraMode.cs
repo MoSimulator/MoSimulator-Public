@@ -4,6 +4,7 @@
     {
         ThirdPerson,
         FirstPerson,
-        DriverStation
+        DriverStationDynamic,
+        DriverStationStatic
     }
 }

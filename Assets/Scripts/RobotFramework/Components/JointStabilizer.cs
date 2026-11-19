@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using MoSimLib;
 using UnityEngine;
 
 namespace RobotFramework.Components
@@ -93,7 +94,7 @@ namespace RobotFramework.Components
                     configurableJoint.angularYMotion = originalYMotion;
                     configurableJoint.angularZMotion = originalZMotion;
 
-                    configurableJoint.linearLimit = new SoftJointLimit() { limit = 180f, bounciness = 0f };
+                    configurableJoint.linearLimit = configurableJoint.linearLimit.limit == 0 ? new SoftJointLimit() { limit = 180f, bounciness = 0f } : configurableJoint.linearLimit;
                 }
             }
             deltaTime = Time.fixedDeltaTime;
@@ -128,7 +129,14 @@ namespace RobotFramework.Components
         }
 
         // Add a public method to add a new joint to the stabilizer
-        public void AddJoint(Joint newJoint)
+        public MoSimResult<MoSimLib.Void> AddJoint(Joint newJoint)
+        {
+            var version = MoSim.ActiveVersion;
+            AddJointV1(newJoint);
+            return MoSimResult<MoSimLib.Void>.Success(new MoSimLib.Void());
+        }
+
+        private void AddJointV1(Joint newJoint)
         {
             if (newJoint == null) return;
 
@@ -195,7 +203,14 @@ namespace RobotFramework.Components
             }
         }
 
-        public void AddRigidbody(Rigidbody newRigidbody)
+        public MoSimResult<MoSimLib.Void> AddRigidbody(Rigidbody newRigidbody)
+        {
+            var version = MoSim.ActiveVersion;
+            AddRigidbodyV1(newRigidbody);
+            return MoSimResult<MoSimLib.Void>.Success(new MoSimLib.Void());
+        }
+
+        private void AddRigidbodyV1(Rigidbody newRigidbody)
         {
             if (newRigidbody == null) return;
 

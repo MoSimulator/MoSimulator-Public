@@ -1,0 +1,83 @@
+using Games.Rebuilt.Robots;
+using MoSimLib;
+using RobotFramework.Components;
+using RobotFramework.Controllers.PidSystems;
+using UnityEngine;
+
+    #ROOTNAMESPACEBEGIN#
+public class #SCRIPTNAME# : RebuiltTurretRobot
+{
+    // Joints and rollers: add serialized turret / hood / intake / shooter references here.
+
+    // PIDs and mechanism values: add serialized tuning fields here.
+
+    // Runtime state: add mechanism targets and toggles here.
+    // swmRef, swmSettings, rb, and driveController are inherited.
+
+    protected override void Init()
+    {
+        // Registers HandleSwm, zone dispatch, and shooter-state dispatch exactly once.
+        base.Init();
+        // TODO: Set initial PIDs, mechanism targets, and interpolation maps.
+
+        Scheduler.AddProtectedSystem(UpdateJoints);
+        Scheduler.AddLateRecursive(UpdatePids);
+    }
+
+    private void UpdatePids()
+    {
+        // TODO: Update each joint's PID constants for live tuning.
+    }
+
+    private void UpdateJoints()
+    {
+        // TODO: Apply mechanism targets to the joints.
+    }
+
+    protected override void HandleSwm()
+    {
+        // Assign the inherited swmRef (with a parent) and swmSettings in the Inspector.
+        // SOTMSettings is a struct; only the Rigidbody and Transform references can be null.
+        if (rb != null && swmRef != null && swmRef.parent != null)
+        {
+            base.HandleSwm();
+        }
+    }
+
+    protected override void AllianceZone()
+    {
+        // TODO: Aim the turret / hood at the hub and choose shooter speed.
+    }
+
+    protected override void NeutralZone()
+    {
+        // TODO: Choose a pass target, turret / hood targets, and shooter speed.
+    }
+
+    protected override void Intaking()
+    {
+        // TODO: Run the intake and indexer without feeding the shooter.
+    }
+
+    protected override void IntakingAndShooting()
+    {
+        // TODO: Run the intake, indexer, and shooter feed together.
+    }
+
+    protected override void Shooting()
+    {
+        // TODO: Feed fuel into the shooter.
+    }
+
+    protected override void Idling()
+    {
+        // TODO: Stop feeding and choose idle roller behavior.
+    }
+
+    protected override bool Aligned()
+    {
+        // TODO: Return whether turret / hood alignment and flywheel speed permit shooting.
+        return false;
+    }
+}
+#ROOTNAMESPACEEND#

@@ -29,6 +29,7 @@ namespace RobotFramework.Components
 
         private VelocityJoint _vJoint;
         private Spring _Sjoint;
+        private int _springRequestedFrame = -1;
 
         private Rigidbody rb;
 
@@ -103,6 +104,12 @@ namespace RobotFramework.Components
         }
 
         public VelocityJoint VelocityRoller(float speed)
+        {
+            var version = MoSim.ActiveVersion;
+            return VelocityRollerV1(speed);
+        }
+
+        private VelocityJoint VelocityRollerV1(float speed)
         {
             Vector3 targetAxis;
             switch (rollerAxis)
@@ -192,10 +199,40 @@ namespace RobotFramework.Components
         ///allowedDirection = -1;
         ///allowedVelocity = 180;
         ///hardStopPoint = 0;
+        /// In Update, enables simulation for the next frame's physics steps and returns configuration.
+        /// In FixedUpdate, advances immediately. Contact and return motion share the physics timestep.
         /// </summary>
         /// <returns></returns>
         public Spring SpringLoaded()
         {
+            var version = MoSim.ActiveVersion;
+            if (!Time.inFixedTimeStep)
+            {
+                _springRequestedFrame = Time.frameCount;
+                return _Sjoint;
+            }
+
+            return SpringLoadedV1();
+        }
+
+        private void FixedUpdate()
+        {
+            // Physics runs before Update. Keep the previous frame's signal through every
+            // catch-up step, and expire it when the caller stops requesting spring motion.
+            if (_springRequestedFrame >= 0 && _springRequestedFrame >= Time.frameCount - 1)
+            {
+                SpringLoadedV1();
+            }
+        }
+
+        private void OnDisable()
+        {
+            _springRequestedFrame = -1;
+        }
+
+        private Spring SpringLoadedV1()
+        {
+            float deltaTime = Time.fixedDeltaTime;
             Vector3 axis;
             switch (springAxis)
             {
@@ -231,9 +268,11 @@ namespace RobotFramework.Components
                                 collision.gameObject.layer != LayerMask.NameToLayer("Scoring"))
                             {
                                 var speed = allowedVelocity + (rb.velocity.magnitude);
-                                transform.Rotate(axis, allowedDirection * speed * Time.deltaTime);
-                                _currentPosition += allowedDirection * speed * Time.deltaTime;
-                                _currentVelocity = allowedDirection * speed * Time.deltaTime;
+                                float rotation = allowedDirection * speed * deltaTime;
+                                transform.Rotate(axis, rotation);
+                                _currentPosition += rotation;
+                                // Preserve the legacy release impulse, which stores the contact step.
+                                _currentVelocity = rotation;
                                 notMoved = false;
                             }
                         }
@@ -243,9 +282,9 @@ namespace RobotFramework.Components
 
             if (notMoved)
             {
-                var startAngle = GetAxisAngle(springAxis, startingAngle);
-                var currentAngle = GetAxisAngle(springAxis, transform.localRotation);
-                var angleDifference = AngleDifference(startAngle, currentAngle);
+                float startAngle = GetAxisAngle(springAxis, startingAngle);
+                float currentAngle = GetAxisAngle(springAxis, transform.localRotation);
+                float angleDifference = AngleDifference(startAngle, currentAngle);
                 var springForce = -allowedVelocity * angleDifference;
 
                 float dampingFactor = 0.5f;
@@ -253,7 +292,7 @@ namespace RobotFramework.Components
 
                 var netForce = springForce + dampingForce;
 
-                _currentVelocity += netForce * Time.fixedDeltaTime;
+                _currentVelocity += netForce * deltaTime;
 
 
                 if (Mathf.DeltaAngle(currentAngle, hardStopPoint) > 0 && _currentVelocity > 0)
@@ -267,18 +306,30 @@ namespace RobotFramework.Components
 
                 CurrentVelocityF = _currentVelocity;
                 CurrentAppliedForce = netForce;
-                transform.Rotate(axis, -_currentVelocity * Time.fixedDeltaTime);
+                transform.Rotate(axis, -_currentVelocity * deltaTime);
             }
 
             return _Sjoint;
         }
 
-        public float AngleDifference(float a, float b)
+        public MoSimResult<float> AngleDifference(float a, float b)
+        {
+            var version = MoSim.ActiveVersion;
+            return MoSimResult<float>.Success(AngleDifferenceV1(a, b));
+        }
+
+        private float AngleDifferenceV1(float a, float b)
         {
             return (a - b + 540) % 360 - 180;
         }
 
-        public float GetAxisAngle(JointAxis jointAxis, Quaternion quaternion)
+        public MoSimResult<float> GetAxisAngle(JointAxis jointAxis, Quaternion quaternion)
+        {
+            var version = MoSim.ActiveVersion;
+            return MoSimResult<float>.Success(GetAxisAngleV1(jointAxis, quaternion));
+        }
+
+        private float GetAxisAngleV1(JointAxis jointAxis, Quaternion quaternion)
         {
             Vector3 targetAxis;
 

@@ -1,11 +1,6 @@
 fileFormatVersion: 2
-<<<<<<<< HEAD:Assets/Materials/ScuffedPolycarb.mat.meta
 guid: e299a5dfd3c961648a79064778152084
 NativeFormatImporter:
-========
-guid: b6361afe4fe021d4a93488b5db2318ac
-PrefabImporter:
->>>>>>>> NoWrapPointFix:Assets/Prefabs/Reefscape/Robots/Testing/NoWrapTesting.prefab.meta
   externalObjects: {}
   mainObjectFileID: 2100000
   userData: 

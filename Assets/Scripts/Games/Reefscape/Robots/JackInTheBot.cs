@@ -30,17 +30,21 @@ namespace Games.Reefscape.Robots
         [SerializeField] private Transform rightIntakeSensor;
         [SerializeField] private Transform algaeSlider;
         [SerializeField] private JITBClimber climber;
+        [SerializeField] private Transform coralIntakeTarget;
         
         [Header("Animation Joints (Wheels)")]
         [SerializeField] private GenericAnimationJoint[] intakeWheels;
+        [SerializeField] private GenericAnimationJoint[] algaeWheels;
         [SerializeField] private float wheelIntakeSpeed = 500f;
 
         private ClimbScorer _climbScorer;
         private bool _isScoring = false; // Prevents FixedUpdate from overriding scoring animation
-
+        private bool coralAnimations;
+        
         [SerializeField] private Collider l1POSCollider;
 
         [Header("PID Constants")] 
+        [SerializeField] private float armExtensionSafeLimit = 20f;
         [SerializeField] private PidConstants armPidConstants;
         [SerializeField] private PidConstants wristPidConstants;
         [SerializeField] private float pivotStep;
@@ -142,6 +146,7 @@ namespace Games.Reefscape.Robots
             algaeStallSource.clip = algaeStallClip;
             algaeStallSource.loop = true;
             algaeStallSource.playOnAwake = false;
+            coralAnimations = true;
         }
 
         private void LateUpdate()
@@ -152,9 +157,11 @@ namespace Games.Reefscape.Robots
 
         private void FixedUpdate()
         {
+            bool armAtAngle = Utils.InAngularRange(armJoint.GetSingleAxisAngle(JointAxis.X), -targetArmAngle, 8f);
+
             armJoint.SetTargetAngle(targetArmAngle).withAxis(JointAxis.X).flipDirection();
             wristJoint.SetTargetAngle(targetWristAngle).withAxis(JointAxis.X).flipDirection().noWrap(-30);
-            elevator.SetTarget(targetArmDistance);
+            elevator.SetTarget(armAtAngle || targetArmDistance < armExtensionSafeLimit ? targetArmDistance : 0f);
 
             var canIntakeCoral = _coralController.currentStateNum == 0 && IntakeAction.IsPressed() && _algaeController.currentStateNum == 0;
             var canIntakeAlgae = _algaeController.currentStateNum == 0 && IntakeAction.IsPressed() && _coralController.currentStateNum == 0;
@@ -195,22 +202,35 @@ namespace Games.Reefscape.Robots
             // We only run this if we are NOT in the middle of a scoring coroutine
             if (!_isScoring)
             {
-                bool isIntaking = (CurrentSetpoint == ReefscapeSetpoints.Intake || CurrentSetpoint == ReefscapeSetpoints.RobotSpecial || CurrentSetpoint == ReefscapeSetpoints.Stack) && IntakeAction.IsPressed();
+                bool isIntaking = (CurrentSetpoint == ReefscapeSetpoints.Intake || CurrentSetpoint == ReefscapeSetpoints.RobotSpecial || CurrentSetpoint == ReefscapeSetpoints.Stack || CurrentSetpoint == ReefscapeSetpoints.HighAlgae || CurrentSetpoint == ReefscapeSetpoints.LowAlgae) && IntakeAction.IsPressed();
 
-                if (isIntaking)
+                if (isIntaking && (CurrentRobotMode == ReefscapeRobotMode.Coral && CurrentSetpoint != ReefscapeSetpoints.HighAlgae && CurrentSetpoint != ReefscapeSetpoints.LowAlgae) && !_coralController.HasPiece() && !_algaeController.HasPiece())
                 {
                     foreach (var wheel in intakeWheels)
+                        wheel.VelocityRoller(wheelIntakeSpeed).useAxis(JointAxis.X);
+                    foreach (var wheel in algaeWheels)
+                        wheel.VelocityRoller(-wheelIntakeSpeed).useAxis(JointAxis.X);
+                } else if (isIntaking &&
+                           (CurrentRobotMode == ReefscapeRobotMode.Algae ||
+                            CurrentSetpoint != ReefscapeSetpoints.HighAlgae ||
+                            CurrentSetpoint != ReefscapeSetpoints.LowAlgae) && !_algaeController.HasPiece() && !_coralController.HasPiece())
+                {
+                    foreach (var wheel in intakeWheels)
+                        wheel.VelocityRoller(0).useAxis(JointAxis.X);
+                    foreach (var wheel in algaeWheels)
                         wheel.VelocityRoller(wheelIntakeSpeed).useAxis(JointAxis.X);
                 }
                 else
                 {
                     // Regular stopping of rollers
-                    leftIntakeRollerJoint.ChangeAngularVelocity(0);
-                    rightIntakeRollerJoint.ChangeAngularVelocity(0);
-                    topIntakeRoller.ChangeAngularVelocity(0);
+                    leftIntakeRollerJoint.OverrideRpm(0);
+                    rightIntakeRollerJoint.OverrideRpm(0);
+                    topIntakeRoller.OverrideRpm(0);
                     
                     // Explicitly stop wheel animations
                     foreach (var wheel in intakeWheels)
+                        wheel.VelocityRoller(0).useAxis(JointAxis.X);
+                    foreach (var wheel in algaeWheels)
                         wheel.VelocityRoller(0).useAxis(JointAxis.X);
                 }
             }
@@ -245,6 +265,10 @@ namespace Games.Reefscape.Robots
                     _algaeController.RequestIntake(algaeIntake, canIntakeAlgae && CurrentRobotMode == ReefscapeRobotMode.Algae);
                     break;
                 case ReefscapeSetpoints.Place:
+                    if (_previousSetpoint != ReefscapeSetpoints.Place)
+                    {
+                        coralAnimations = _coralController.HasPiece();
+                    }
                     StartCoroutine(PlaceGamePiece(LastSetpoint, readState));
                     break;
                 case ReefscapeSetpoints.L1:
@@ -311,7 +335,7 @@ namespace Games.Reefscape.Robots
             }
             else
             {
-                _coralController.MoveIntake(coralIntake, coralIntakeState.stateTarget);
+                _coralController.MoveIntake(coralIntake, coralIntakeTarget);
                 if (!leftIntakeRollerJoint.gameObject.activeSelf)
                 {
                     leftIntakeRollerJoint.gameObject.SetActive(true);
@@ -328,8 +352,8 @@ namespace Games.Reefscape.Robots
                 {
                     if (coralRight && coralLeft)
                     {
-                        leftIntakeRollerJoint.ChangeAngularVelocity(8000);
-                        rightIntakeRollerJoint.ChangeAngularVelocity(8000);
+                        leftIntakeRollerJoint.OverrideRpm(9000);
+                        rightIntakeRollerJoint.OverrideRpm(9000);
                     }
                 }
             }
@@ -343,10 +367,21 @@ namespace Games.Reefscape.Robots
             
             // Front (FacingReef) -> Spin Same Way (+)
             // Back (Not FacingReef) -> Spin Opposite Way (-)
-            float speed = FacingReef ? wheelIntakeSpeed : -wheelIntakeSpeed;
+            if (coralAnimations)
+            {
+                float speed = FacingReef ? wheelIntakeSpeed : -wheelIntakeSpeed;
 
-            foreach (var wheel in intakeWheels)
-                wheel.VelocityRoller(speed).useAxis(JointAxis.X);
+                foreach (var wheel in intakeWheels)
+                    wheel.VelocityRoller(speed).useAxis(JointAxis.X);
+                foreach (var wheel in algaeWheels)
+                    wheel.VelocityRoller(-speed).useAxis(JointAxis.X);
+            } else
+            {
+                foreach (var wheel in intakeWheels)
+                    wheel.VelocityRoller(0).useAxis(JointAxis.X);
+                foreach (var wheel in algaeWheels)
+                    wheel.VelocityRoller(-wheelIntakeSpeed).useAxis(JointAxis.X);
+            }
 
             if (lastSetpoint is ReefscapeSetpoints.Barge)
             {
@@ -357,15 +392,20 @@ namespace Games.Reefscape.Robots
             }
             else if ((lastSetpoint == ReefscapeSetpoints.L1 && CurrentIntakeMode != ReefscapeIntakeMode.L1))
             {
-                leftIntakeRollerJoint.ChangeAngularVelocity(1000);
-                rightIntakeRollerJoint.ChangeAngularVelocity(-1000);
-                topIntakeRoller.flipVelocity();
+                leftIntakeRollerJoint.OverrideRpm(2000);
+                rightIntakeRollerJoint.OverrideRpm(-2000);
+                topIntakeRoller.OverrideRpm(-2000);
             }
             else if ((lastSetpoint is not ReefscapeSetpoints.Processor && !FacingReef))
             {
-                leftIntakeRollerJoint.flipVelocity();
-                rightIntakeRollerJoint.flipVelocity();
-                topIntakeRoller.flipVelocity();
+                leftIntakeRollerJoint.OverrideRpm(2000);
+                rightIntakeRollerJoint.OverrideRpm(-2000);
+                topIntakeRoller.OverrideRpm(8000);
+            } if ((lastSetpoint is not ReefscapeSetpoints.Processor && FacingReef))
+            {
+                leftIntakeRollerJoint.OverrideRpm(-2000);
+                rightIntakeRollerJoint.OverrideRpm(2000);
+                topIntakeRoller.OverrideRpm(-8000);
             }
 
             Vector3 force;
@@ -373,7 +413,7 @@ namespace Games.Reefscape.Robots
                 force = new Vector3(1, 0, 0);
             else
             {
-                force = FacingReef ? new Vector3(0, 0, -5) : new Vector3(0, 0, 5);
+                force = FacingReef ? new Vector3(0, 0, -8) : new Vector3(0, 0, 8);
                 if (LastSetpoint == ReefscapeSetpoints.L1) force = new Vector3(0, 0, 2f);
             }
 
@@ -398,6 +438,8 @@ namespace Games.Reefscape.Robots
             
             // Explicitly stop wheels
             foreach (var wheel in intakeWheels) 
+                wheel.VelocityRoller(0).useAxis(JointAxis.X);
+            foreach (var wheel in algaeWheels) 
                 wheel.VelocityRoller(0).useAxis(JointAxis.X);
                 
             _isScoring = false; // Release lock

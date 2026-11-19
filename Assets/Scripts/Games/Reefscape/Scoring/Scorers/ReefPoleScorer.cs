@@ -1,9 +1,12 @@
 ﻿using Games.Reefscape.Enums;
 using Games.Reefscape.FieldScripts;
+using Games.Reefscape.GamePieceSystem;
 using MoSimCore.BaseClasses.GameManagement;
 using MoSimCore.Enums;
 using MoSimCore.Interfaces;
 using MoSimLib;
+using RobotFramework;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -17,13 +20,20 @@ namespace Games.Reefscape.Scoring.Scorers
         private GameObject _triggersCache;
         private Branch[] _branches;
         private bool _initialized;
+        private int _supportExclusionMask;
+
+        // Update queues every branch as one batch. FixedUpdate performs that batch
+        // once, then Update applies the saved results on its following frame.
+        private readonly List<Branch> _branchCheckQueue = new();
+        private readonly List<BranchCheckResult> _completedBranchChecks = new();
+        private bool _branchCheckResultsReady;
 
         [SerializeField] private AudioClip scoreClip;
         [SerializeField] private AudioSource poleAudioSource;
 
         private void Awake()
         {
-            if (SceneManager.GetActiveScene().name == "MainMenu")
+            if (SceneManager.GetActiveScene().name == "MainMenuReefscape")
             {
                 enabled = false;
                 return;
@@ -38,6 +48,7 @@ namespace Games.Reefscape.Scoring.Scorers
             }
 
             Alliance = _reef.Alliance;
+            _supportExclusionMask = LayerMask.GetMask("Algae", "Robot");
 
             _triggersCache = Utils.FindChild("Triggers", gameObject);
             if (_triggersCache == null)
@@ -87,6 +98,45 @@ namespace Games.Reefscape.Scoring.Scorers
                 return;
             }
             
+            if (_branchCheckResultsReady)
+            {
+                foreach (var checkResult in _completedBranchChecks)
+                {
+                    ApplyCoralCheck(checkResult);
+                }
+
+                _completedBranchChecks.Clear();
+                _branchCheckResultsReady = false;
+            }
+
+            QueueBranchChecks();
+        }
+
+        private void FixedUpdate()
+        {
+            if (_branchCheckQueue.Count == 0)
+            {
+                return;
+            }
+
+            _completedBranchChecks.Clear();
+            foreach (var branch in _branchCheckQueue)
+            {
+                if (branch?.ScoringTrigger == null)
+                {
+                    continue;
+                }
+
+                _completedBranchChecks.Add(EvaluateCoral(branch));
+            }
+
+            _branchCheckQueue.Clear();
+            _branchCheckResultsReady = true;
+        }
+
+        private void QueueBranchChecks()
+        {
+            _branchCheckQueue.Clear();
             foreach (var branch in _branches)
             {
                 if (branch?.ScoringTrigger == null)
@@ -94,13 +144,23 @@ namespace Games.Reefscape.Scoring.Scorers
                     Debug.LogError("Branch or ScoringTrigger is null in ReefPoleScorer on " + gameObject.name);
                     continue;
                 }
-                CheckCoral(branch);
 
-                if (branch.ScoredInAuto && !branch.Scored)
-                {
-                    branch.ScoredInAuto = false;
-                }
+                _branchCheckQueue.Add(branch);
             }
+        }
+
+        /// <summary>
+        /// returns what branches are scored in an array. (l4:0, l3:1, l2:2)
+        /// </summary>
+        /// <returns></returns>
+        public bool[] GetScoredHeights()
+        {
+            bool[] result = new bool[3];
+            result[0] = _branches[0].Scored;
+            result[1] = _branches[1].Scored;
+            result[2] = _branches[2].Scored;
+            
+            return result;
         }
 
         public void AddScore(IScoreData scoreData, GameState gameState)
@@ -136,24 +196,46 @@ namespace Games.Reefscape.Scoring.Scorers
             }
         }
 
-        private void CheckCoral(Branch branch)
+        private BranchCheckResult EvaluateCoral(Branch branch)
         {
             var hasCoral = false;
-            Collider coralCollider = null;
+            ReefscapeGamePieceController scoredPiece = null;
             foreach (var result in Physics.OverlapBox(branch.center,
                          branch.bounds,
                          branch.rotation))
             {
                 if (!result.CompareTag("Coral")) continue;
+
+                // A coral held by a robot has its colliders reparented under the
+                // robot, so an ancestor RobotBase means it isn't on the branch.
+                if (result.GetComponentInParent<RobotBase>() != null) continue;
+
+                // A coral propped up by an algae or pressed in by a robot isn't
+                // legitimately scored either — reject anything touching them.
+                if (Physics.CheckBox(result.bounds.center, result.bounds.extents * 1.05f,
+                        Quaternion.identity, _supportExclusionMask)) continue;
+
                 hasCoral = true;
-                coralCollider = result;
+                scoredPiece = result.GetComponentInParent<ReefscapeGamePieceController>();
+                break;
             }
 
-            switch (hasCoral)
+            return new BranchCheckResult(branch, hasCoral, scoredPiece);
+        }
+
+        private void ApplyCoralCheck(BranchCheckResult checkResult)
+        {
+            var branch = checkResult.Branch;
+            switch (checkResult.HasCoral)
             {
-                case true when !branch.Scored && coralCollider != null &&
-                               coralCollider.transform.parent.gameObject.layer != LayerMask.NameToLayer("Robot"):
+                case true when !branch.Scored:
                     branch.Scored = true;
+                    branch.ScoredPiece = checkResult.ScoredPiece;
+                    if (checkResult.ScoredPiece != null)
+                    {
+                        checkResult.ScoredPiece.IsScored = true;
+                    }
+
                     if (!branch.ScoredInAuto && BaseGameManager.Instance.GameState == GameState.Auto)
                     {
                         branch.ScoredInAuto = true;
@@ -166,7 +248,27 @@ namespace Games.Reefscape.Scoring.Scorers
                     break;
                 case false when branch.Scored:
                     branch.Scored = false;
+                    if (branch.ScoredPiece != null)
+                    {
+                        branch.ScoredPiece.IsScored = false;
+                    }
+
+                    branch.ScoredPiece = null;
                     break;
+            }
+        }
+
+        private readonly struct BranchCheckResult
+        {
+            public Branch Branch { get; }
+            public bool HasCoral { get; }
+            public ReefscapeGamePieceController ScoredPiece { get; }
+
+            public BranchCheckResult(Branch branch, bool hasCoral, ReefscapeGamePieceController scoredPiece)
+            {
+                Branch = branch;
+                HasCoral = hasCoral;
+                ScoredPiece = scoredPiece;
             }
         }
 
@@ -176,6 +278,7 @@ namespace Games.Reefscape.Scoring.Scorers
             public BoxCollider ScoringTrigger { get; }
             public bool Scored { get; set; }
             public bool ScoredInAuto { get; set; }
+            public ReefscapeGamePieceController ScoredPiece { get; set; }
 
             public Vector3 bounds;
 

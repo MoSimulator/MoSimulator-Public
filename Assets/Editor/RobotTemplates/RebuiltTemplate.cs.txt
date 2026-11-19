@@ -1,0 +1,77 @@
+using Games.Rebuilt.Components;
+using Games.Rebuilt.Robots;
+using MoSimLib;
+using RobotFramework.Components;
+using RobotFramework.Controllers.PidSystems;
+using UnityEngine;
+
+    #ROOTNAMESPACEBEGIN#
+public class #SCRIPTNAME# : RebuiltRobotBase
+{
+    // Joints and rollers: add serialized GenericJoint / RollerGroup references here.
+
+    // PIDs: add serialized PidConstants here.
+
+    // Interpolations: add serialized RebuiltInterpolation references here.
+
+    // Mechanism values: add serialized angles, distances, and speeds here.
+
+    // Runtime state: add target positions, toggles, and the auto-aim controller here.
+
+    protected override void Init()
+    {
+        // TODO: Set initial PIDs, targets, and toggles; initialize interpolation maps.
+
+        Scheduler.AddSubsystems(Intake, Hopper, Shooter, HandleAutoAim, Climber);
+        Scheduler.AddProtectedSystem(UpdateJoints);
+        Scheduler.AddLateRecursive(UpdatePids);
+    }
+
+    private void UpdatePids()
+    {
+        // TODO: Update each joint's PID constants for live tuning.
+    }
+
+    private void Climber()
+    {
+        // TODO: Read ClimbAction and choose the climber target.
+    }
+
+    private void Intake()
+    {
+        // TODO: Read IntakeAction / StowAction and control deployment and rollers.
+        // Call WobbleIntake() here if the mechanism supports it.
+    }
+
+    private void Hopper()
+    {
+        // TODO: Choose the hopper target and indexer behavior.
+    }
+
+    private void HandleAutoAim()
+    {
+        // TODO: Select hub / pass targeting and request auto-aim.
+    }
+
+    private void Shooter()
+    {
+        // TODO: Gate feeding on shooting inputs and alignment; set flywheel / hood targets.
+        // Call SetInterpMap() when selecting the shot's interpolation maps.
+    }
+
+    private void SetInterpMap()
+    {
+        // TODO: Select the hub / pass maps for the flywheel and hood.
+    }
+
+    private void UpdateJoints()
+    {
+        // TODO: Apply the target positions chosen by the subsystems to the joints.
+    }
+
+    private void WobbleIntake()
+    {
+        // TODO: Adjust the intake target to clear a jam or agitate fuel.
+    }
+}
+#ROOTNAMESPACEEND#

@@ -1,4 +1,5 @@
 using System;
+using MoSimLib;
 using UnityEngine;
 
 namespace RobotFramework.Controllers.PidSystems
@@ -14,38 +15,58 @@ namespace RobotFramework.Controllers.PidSystems
         /// <summary>
         /// The P value of the PID
         /// </summary>
-        public float proportionalGain;
+        public Fixed32 proportionalGain = new Fixed32(Fixed32.DefaultScale, 0);
         /// <summary>
         /// The I gain of the PID
         /// </summary>
-        public float integralGain;
+        public Fixed32 integralGain = new Fixed32(Fixed32.DefaultScale, 0);
         /// <summary>
         /// The D gain of the PID
         /// </summary>
-        public float derivativeGain;
+        public Fixed32 derivativeGain = new Fixed32(Fixed32.DefaultScale, 0);
 
         /// <summary>
         /// Minimum output value for the PID
         /// </summary>
-        public float outputMin = -1;
+        public Fixed32 outputMin = new Fixed32(Fixed32.DefaultScale, -1);
         /// <summary>
         /// Maximum Output value for the PID
         /// </summary>
-        public float outputMax = 1;
-        public float integralSaturation;
+        public Fixed32 outputMax = new Fixed32(Fixed32.DefaultScale, 1);
+        public Fixed32 integralSaturation = new Fixed32(Fixed32.DefaultScale, 0);
         public DerivativeMeasurement derivativeMeasurement;
 
-        public float valueLast;
-        public float errorLast;
-        public float integrationStored;
-        public float velocity;
+        public Fixed32 valueLast = new Fixed32(Fixed32.DefaultScale, 0);
+        public Fixed32 errorLast = new Fixed32(Fixed32.DefaultScale, 0);
+        public Fixed32 integrationStored = new Fixed32(Fixed32.DefaultScale, 0);
+        public Fixed32 velocity = new Fixed32(Fixed32.DefaultScale, 0);
         public bool derivativeInitialized;
+        public Fixed32 dOutput =  new Fixed32(Fixed32.DefaultScale, 0);
 
         /// <summary>
         /// Resets the PID controller
         /// </summary>
-        public void ResetController() {
+        public MoSimResult<MoSimLib.Void> ResetController() {
+            var version = MoSim.ActiveVersion;
+            MigrateLegacyFixed32Values();
+            ResetControllerV1();
+            return MoSimResult<MoSimLib.Void>.Success(new MoSimLib.Void());
+        }
+
+        private void ResetControllerV1() {
             derivativeInitialized = false;
+        }
+
+        public static Fixed32 ToFixedDeltaTime(float _dt)
+        {
+            var version = MoSim.ActiveVersion;
+            return ToFixedDeltaTimeV1(_dt);
+        }
+
+        private static Fixed32 ToFixedDeltaTimeV1(float _dt)
+        {
+            float minDt = 1f / Fixed32.ScaleFactor(Fixed32.DefaultScale);
+            return new Fixed32(Fixed32.DefaultScale, Mathf.Max(_dt, minDt));
         }
 
         /// <summary>
@@ -56,24 +77,33 @@ namespace RobotFramework.Controllers.PidSystems
         /// <param name="targetValue"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentOutOfRangeException"></exception>
-        public float UpdateLinear(float dt, float currentValue, float targetValue) {
+        public MoSimResult<float> UpdateLinear(float dt, float currentValue, float targetValue) {
+            var version = MoSim.ActiveVersion;
+            MigrateLegacyFixed32Values();
+            return MoSimResult<float>.Success(UpdateLinearV1(dt, currentValue, targetValue));
+        }
+
+        private float UpdateLinearV1(float dt, float currentValue, float targetValue) {
             if (dt <= 0) throw new ArgumentOutOfRangeException(nameof(dt));
+            Fixed32 dT = ToFixedDeltaTimeV1(dt);
+            Fixed32 cValue = new Fixed32(Fixed32.DefaultScale, currentValue);
+            Fixed32 tValue = new Fixed32(Fixed32.DefaultScale, targetValue);
+            
+            Fixed32 error = tValue - cValue;
 
-            float error = targetValue - currentValue;
+            Fixed32 P = proportionalGain * error;
 
-            float P = proportionalGain * error;
+            integrationStored = Fixed32.Clamp(integrationStored + error * dT, -integralSaturation, integralSaturation);
+            Fixed32 I = integralGain * integrationStored;
 
-            integrationStored = Mathf.Clamp(integrationStored + error * dt, -integralSaturation, integralSaturation);
-            float I = integralGain * integrationStored;
-
-            float errorRateOfChange = (error - errorLast) / dt;
+            Fixed32 errorRateOfChange = (error - errorLast) / dT;
             errorLast = error;
 
-            float valueRateOfChange = (currentValue - valueLast) / dt;
-            valueLast = currentValue;
+            Fixed32 valueRateOfChange = (cValue - valueLast) / dT;
+            valueLast = cValue;
             velocity = valueRateOfChange;
 
-            float deriveMeasure = 0;
+            Fixed32 deriveMeasure = 0;
 
             if (derivativeInitialized) {
                 if (derivativeMeasurement == DerivativeMeasurement.Velocity)
@@ -85,13 +115,15 @@ namespace RobotFramework.Controllers.PidSystems
                 derivativeInitialized = true;
             }
 
-            float D = derivativeGain * deriveMeasure;
+            Fixed32 D = derivativeGain * deriveMeasure;
+            
+            dOutput = D;
 
-            var pd = Mathf.Clamp(P + D, outputMin, outputMax);
+            Fixed32 pd = Fixed32.Clamp(P + D, outputMin, outputMax);
 
-            float result = pd + I;
+            Fixed32 result = pd + I;
 
-            return Mathf.Clamp(result, outputMin - integralSaturation, outputMax + integralSaturation);
+            return Fixed32.Clamp(result, outputMin - integralSaturation, outputMax + integralSaturation);
         }
 
         /// <summary>
@@ -100,8 +132,18 @@ namespace RobotFramework.Controllers.PidSystems
         /// <param name="a"></param>
         /// <param name="b"></param>
         /// <returns></returns>
-        public float AngleDifference(float a, float b) {
-            return (a - b + 540) % 360 - 180;
+        public MoSimResult<Fixed32> AngleDifference(float a, float b) {
+            var version = MoSim.ActiveVersion;
+            return MoSimResult<Fixed32>.Success(AngleDifferenceV1(a, b));
+        }
+
+        private Fixed32 AngleDifferenceV1(float a, float b) {
+            float valA = (float)a; 
+            float valB = (float)b;
+    
+            float diff = (valA - valB + 540f) % 360f - 180f;
+    
+            return new Fixed32(Fixed32.DefaultScale, diff);
         }
 
         /// <summary>
@@ -112,23 +154,48 @@ namespace RobotFramework.Controllers.PidSystems
         /// <param name="targetAngle"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentOutOfRangeException"></exception>
-        public float UpdateAngle(float dt, float currentAngle, float targetAngle) {
+        public MoSimResult<float> UpdateAngle(float dt, float currentAngle, float targetAngle) {
+            var version = MoSim.ActiveVersion;
+            MigrateLegacyFixed32Values();
+            return MoSimResult<float>.Success(UpdateAngleV1(dt, currentAngle, targetAngle));
+        }
+
+        private void MigrateLegacyFixed32Values()
+        {
+            proportionalGain = Fixed32.MigrateLegacyBinary16(proportionalGain);
+            integralGain = Fixed32.MigrateLegacyBinary16(integralGain);
+            derivativeGain = Fixed32.MigrateLegacyBinary16(derivativeGain);
+            outputMin = Fixed32.MigrateLegacyBinary16(outputMin);
+            outputMax = Fixed32.MigrateLegacyBinary16(outputMax);
+            integralSaturation = Fixed32.MigrateLegacyBinary16(integralSaturation);
+            valueLast = Fixed32.MigrateLegacyBinary16(valueLast);
+            errorLast = Fixed32.MigrateLegacyBinary16(errorLast);
+            integrationStored = Fixed32.MigrateLegacyBinary16(integrationStored);
+            velocity = Fixed32.MigrateLegacyBinary16(velocity);
+            dOutput = Fixed32.MigrateLegacyBinary16(dOutput);
+        }
+
+        private float UpdateAngleV1(float dt, float currentAngle, float targetAngle) {
             if (dt <= 0) throw new ArgumentOutOfRangeException(nameof(dt));
-            float error = AngleDifference(targetAngle, currentAngle);
+            Fixed32 dT = ToFixedDeltaTimeV1(dt);
+            Fixed32 cAngle = new Fixed32(Fixed32.DefaultScale, currentAngle);
+            Fixed32 tAngle = new Fixed32(Fixed32.DefaultScale, targetAngle);
+            
+            Fixed32 error = AngleDifferenceV1(tAngle, cAngle);
 
-            float P = proportionalGain * error;
+            Fixed32 P = proportionalGain * error;
 
-            integrationStored = Mathf.Clamp(integrationStored + error * dt, -integralSaturation, integralSaturation);
-            float I = integralGain * integrationStored;
+            integrationStored = Fixed32.Clamp(integrationStored + error * dT, -integralSaturation, integralSaturation);
+            Fixed32 I = integralGain * integrationStored;
 
-            float errorRateOfChange = AngleDifference(error, errorLast) / dt;
+            Fixed32 errorRateOfChange = AngleDifferenceV1(error, errorLast) / dT;
             errorLast = error;
 
-            float valueRateOfChange = AngleDifference(currentAngle, valueLast) / dt;
-            valueLast = currentAngle;
+            Fixed32 valueRateOfChange = AngleDifferenceV1(cAngle, valueLast) / dT;
+            valueLast = cAngle;
             velocity = valueRateOfChange;
 
-            float deriveMeasure = 0;
+            Fixed32 deriveMeasure = 0;
 
             if (derivativeInitialized) {
                 if (derivativeMeasurement == DerivativeMeasurement.Velocity)
@@ -140,13 +207,15 @@ namespace RobotFramework.Controllers.PidSystems
                 derivativeInitialized = true;
             }
 
-            float D = derivativeGain * deriveMeasure;
+            Fixed32 D = derivativeGain * deriveMeasure;
 
-            var pd = Mathf.Clamp(P + D, outputMin, outputMax);
+            dOutput = D;
 
-            float result = pd + I;
+            Fixed32 pd = Fixed32.Clamp(P + D, outputMin, outputMax);
 
-            return Mathf.Clamp(result, outputMin - integralSaturation, outputMax+ integralSaturation);
+            Fixed32 result = pd + I;
+
+            return Fixed32.Clamp(result, outputMin - integralSaturation, outputMax+ integralSaturation);
         }
     }
 }

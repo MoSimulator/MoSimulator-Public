@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: be1409438a6844eea96767966da7413b, type: 3}
+  m_Name: CitrusCircuits
+  m_EditorClassIdentifier: 
+  teamNumber: 1678
+  teamName: CitrusCircuits
+  robotImage: {fileID: 21300000, guid: f64e8392a678cf841bb9bda6db436799, type: 3}
+  mainRobot:
+    displayName: 
+    robotPrefab: {fileID: 7502663017153341079, guid: bfced5a5d5823e54d97613bcb22c4876,
+      type: 3}
+    mainMenuPrefab: {fileID: 7144918864449641783, guid: 8b68b831db190844cb53f3bb6759cdc6,
+      type: 3}
+    spawnSelectionPrefab: {fileID: 2796957277029712344, guid: f953ed2c045bfd849b944b7e87a9b77d,
+      type: 3}
+    preloadGamePiece: {fileID: 2886892246794840118, guid: 96adc4350dc09d942b6bf56af73710ca,
+      type: 3}
+    tutorialCards:
+    - {fileID: 6829736770845459078, guid: 0a2997c1057e247ad993f534938093f9, type: 3}
+    - {fileID: 6829736770845459078, guid: f1976125e60284048b2641de51217cab, type: 3}
+    - {fileID: 6829736770845459078, guid: 60df5c9c026bc4efa9057c375aec2f3a, type: 3}
+  alternateRobots: []

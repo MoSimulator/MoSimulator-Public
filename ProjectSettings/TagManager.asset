@@ -21,6 +21,14 @@ TagManager:
   - Cage
   - ReefFace
   - RecordingCamera
+  - Note
+  - Fuel
+  - Deez
+  - BlueStartLineWide
+  - RedStartLineWide
+  - Bumpers
+  - BlueReefZone
+  - RedReefZone
   layers:
   - Default
   - TransparentFX
@@ -34,10 +42,10 @@ TagManager:
   - LEDs
   - Scoring
   - Camera
-  - 
-  - 
-  - 
-  - 
+  - GamePiece1
+  - GamePiece2
+  - AutoAngleNodes
+  - GamePieceAlt
   - 
   - 
   - 

@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1aff2b59de2c4a0c96d6b848990b46af, type: 3}
+  m_Name: JackInTheBot
+  m_EditorClassIdentifier: 
+  teamNumber: 2910
+  teamName: Jack in the Bot
+  robotImage: {fileID: 21300000, guid: 0580a467c5dc446408296d3ad4c65003, type: 3}
+  mainRobot:
+    displayName: 
+    robotPrefab: {fileID: 4108337974173178762, guid: 23d6ffb9927b7904ea49df0bfe293ecc,
+      type: 3}
+    mainMenuPrefab: {fileID: 1988056642793775902, guid: bc46bdc5e3517e448bd0d792c409b41b,
+      type: 3}
+    spawnSelectionPrefab: {fileID: 4108337974173178762, guid: 694ca2c13b9c32a40b03dd2869301f41,
+      type: 3}
+    preloadGamePiece: {fileID: 2185987706872048638, guid: 970bdf84a203d9a4b8dc602974341a07,
+      type: 3}
+    tutorialCards:
+    - {fileID: 6829736770845459078, guid: 3f8b49d73022a464689bff3eccac415a, type: 3}
+    - {fileID: 6829736770845459078, guid: 78ac926416757c4489f86de7e95d0d1a, type: 3}
+    - {fileID: 6829736770845459078, guid: cb4f01c33d77a4e47a56bdf1bc362db1, type: 3}
+  alternateRobots: []
+  autoClimbs: 1

@@ -1,0 +1,22 @@
+{
+    "name": "GameSystems.Modding.Editor",
+    "rootNamespace": "GameSystems.Modding.Authoring",
+    "references": [
+        "GameSystems",
+        "MoSimCore",
+        "MoSimLib",
+        "RobotFramework",
+        "Steam"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

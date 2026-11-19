@@ -7,7 +7,8 @@
     public interface IScoreData
     {
         /// <summary>Gets the total points for an alliance.</summary>
-        int TotalPoints { get; }
+        MoSimLib.SecureFloat TotalPoints { get; }
+        MoSimLib.SecureFloat PenaltyPoints { get; }
         
         /// <summary>
         /// Resets all score values to their initial state.

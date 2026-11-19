@@ -1,0 +1,6 @@
+<dependencies>
+  <androidPackages>
+    <androidPackage spec="androidx.browser:browser:1.8.0"/>
+    <androidPackage spec="androidx.core:core:1.13.1"/>
+  </androidPackages>
+</dependencies>
